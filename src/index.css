@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "@fontsource-variable/roboto";
+@import "@fontsource-variable/open-sans";
+@import "@fontsource/oswald/600.css";
+
+@theme {
+  --font-roboto: "Roboto Variable", Roboto, sans-serif;
+  --font-opensans: "Open Sans Variable", "Open Sans", sans-serif;
+  --font-logo: "Oswald", "Arial Narrow", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #000;
+}
+
+button {
+  font: inherit;
+}
+
+/* Assets not yet supplied render nothing instead of a broken-image box. */
+img:not([src]) {
+  visibility: hidden;
+}
