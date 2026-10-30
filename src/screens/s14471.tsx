@@ -1,4 +1,5 @@
 import { A } from '../assets/a14471';
+import { ContentHost } from './cs1304_8684host';
 
 
 function Frame409({ className }: { className?: string }) {
@@ -441,96 +442,6 @@ function Frame392({ className }: { className?: string }) {
   );
 }
 
-type ContentStatesProps = {
-  className?: string;
-  property1?: "Chat";
-};
-
-function ContentStates({ className, property1 = "Chat" }: ContentStatesProps) {
-  return (
-    <div className={className || "h-[760px] relative w-[1000px]"} data-node-id="1304:8693">
-      <div className="absolute contents left-0 top-0" data-node-id="1304:8694">
-        <div className="absolute h-0 left-0 top-[49px] w-[1000px]" data-node-id="1304:8695">
-          <div className="absolute inset-[-1px_0_0_0]">
-            <img alt="" className="block max-w-none size-full" src={A.imgLine198} />
-          </div>
-        </div>
-        <div className="absolute bg-[#202125] content-stretch flex flex-col items-start left-[8px] top-0 w-[904px]" data-node-id="1304:8696" data-name="Tabs-dark">
-          <div className="content-stretch cursor-pointer flex items-start relative shrink-0 w-full" data-node-id="I1304:8696;54563:40455" data-name="Tab group">
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54563:40456" data-name="Tab 1">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54563:40456;54563:40740" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54563:40456;54563:40741" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#ccc2dc] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54563:40456;54563:40742" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Digital twin</p>
-                  </div>
-                </div>
-                <div className="absolute bg-[#ccc2dc] bottom-0 h-[2px] left-0 right-0" data-node-id="I1304:8696;54563:40456;54563:40744" data-name="Indicator" />
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54563:40457" data-name="Tab 2">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54563:40457;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54563:40457;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54563:40457;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">{`Chat `}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54563:40458" data-name="Tab 3">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54563:40458;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54563:40458;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54563:40458;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Chat history</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54563:40459" data-name="Tab 4">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54563:40459;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54563:40459;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54563:40459;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Chat summary</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54563:40460" data-name="Tab 5">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54563:40460;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54563:40460;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54563:40460;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Suggested actions</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54847:25133" data-name="Tab 6">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54847:25133;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54847:25133;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54847:25133;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Deliverables</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#202125] content-stretch flex flex-col h-[48px] items-center justify-end overflow-clip relative shrink-0" data-node-id="I1304:8696;54847:25139" data-name="Tab 7">
-              <div className="content-stretch flex flex-[1_0_0] flex-col items-center justify-center min-h-px overflow-clip px-[16px] py-[14px] relative w-full" data-node-id="I1304:8696;54847:25139;54563:40769" data-name="State-layer">
-                <div className="content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px relative" data-node-id="I1304:8696;54847:25139;54563:40770" data-name="Tab Contents">
-                  <div className="[word-break:break-word] flex flex-col font-roboto font-medium justify-center leading-[0] relative shrink-0 text-[#d0bcff] text-[14px] text-center tracking-[0.1px] whitespace-nowrap" data-node-id="I1304:8696;54847:25139;54563:40771" style={{ fontVariationSettings: '"wdth" 100' }}>
-                    <p className="leading-[20px]">Collaborators</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="h-px relative shrink-0 w-full" data-node-id="I1304:8696;54563:40461" data-name="Divider">
-            <img alt="" className="absolute block inset-0 max-w-none size-full" src={A.imgDivider} />
-          </div>
-        </div>
-      </div>
-      <Frame392 className="absolute h-[711px] left-[-3px] overflow-x-clip overflow-y-auto top-[49px] w-[950px]" />
-    </div>
-  );
-}
 
 type SearchBarDarkProps = {
   className?: string;
@@ -731,7 +642,7 @@ export default function Root() {
           </div>
         </div>
       </div>
-      <ContentStates className="absolute h-[760px] left-[728px] top-[191px] w-[1000px]" />
+      <ContentHost x={728} y={191} />
       <div className="absolute bg-[#202125] h-[848px] left-[265px] overflow-x-clip overflow-y-auto top-[108px] w-[427px]" data-node-id="4801:14482">
         <a className="absolute contents cursor-pointer left-0 top-[158px]" data-node-id="4801:14483">
           <div className="absolute bg-[#141218] inset-[18.63%_0_70.28%_0] overflow-clip rounded-[21px]" data-node-id="4801:14484" data-name="Building blocks/Card states/Outlined - dark" />

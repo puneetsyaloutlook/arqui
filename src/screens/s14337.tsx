@@ -1,4 +1,5 @@
 import { A } from '../assets/a14337';
+import { ContentHost } from './cs1304_8513host';
 
 
 type Component12Props = {
@@ -1253,6 +1254,8 @@ export default function Root() {
           </div>
         </div>
       </div>
+      <div className="absolute bg-[#202125]" style={{ left: 728, top: 257, width: 1000, height: 681 }} />
+      <ContentHost x={728} y={257} />
     </div>
   );
 }
