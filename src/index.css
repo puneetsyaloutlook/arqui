@@ -4,9 +4,27 @@
 @import "@fontsource/oswald/600.css";
 
 @theme {
-  --font-roboto: "Roboto Variable", Roboto, sans-serif;
-  --font-opensans: "Open Sans Variable", "Open Sans", sans-serif;
+  --font-sans: "Roboto Variable", Roboto, system-ui, sans-serif;
+  --font-body: "Open Sans Variable", "Open Sans", system-ui, sans-serif;
   --font-logo: "Oswald", "Arial Narrow", sans-serif;
+
+  --color-canvas: #202125;
+  --color-rail: #141218;
+  --color-panel: #1d1b20;
+  --color-panel-hi: #2b2930;
+  --color-field: #36343b;
+  --color-line: #36343b;
+  --color-chip: #4e4b53;
+  --color-primary: #d0bcff;
+  --color-on-primary: #381e72;
+  --color-pink: #ed00b8;
+  --color-teal: #00c2a7;
+  --color-orange: #ff693e;
+  --color-amber: #ffbb33;
+  --color-muted: #aeaeae;
+  --color-subtle: #7a7480;
+  --color-outline: #938f99;
+  --color-ink: #e6e0e9;
 }
 
 html,
@@ -14,14 +32,22 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: #000;
+  background: #202125;
+  color: #e6e0e9;
+  font-family: var(--font-sans);
 }
 
 button {
   font: inherit;
 }
 
-/* Assets not yet supplied render nothing instead of a broken-image box. */
-img:not([src]) {
-  visibility: hidden;
+:focus-visible {
+  outline: 2px solid #d0bcff;
+  outline-offset: 2px;
+}
+
+/* Thin scrollbars that suit the dark theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #4e4b53 transparent;
 }
