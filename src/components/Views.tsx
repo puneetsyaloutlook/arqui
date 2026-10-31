@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AREA_PATH, type Horizon, type Insight } from '../data/seed';
-import { CAPABILITY_DATA, PERSPECTIVES, PROJECT_BANDS, QUALITY, TWIN_SUMMARY, TYPE_COLOURS } from '../data/twin';
-import { Select } from './ui';
+import { CAPABILITY_DATA, MEASURES, PERSPECTIVES, PROJECT_BANDS, QUALITY, SCALE, TWIN_SUMMARY, type CapabilityData, type Measure } from '../data/twin';
+import { X } from 'lucide-react';
 import { useApp } from '../state/store';
 
 /* ---------- Insight landscape ---------- */
@@ -159,8 +159,6 @@ function Confidence({ value }: { value: number }) {
   );
 }
 
-type Measure = 'Investment' | 'Projects' | 'Confidence';
-type ColourBy = 'Projects' | 'Capability type' | 'Confidence';
 interface Rect { x: number; y: number; w: number; h: number }
 
 /** Squarified treemap layout in a W by H space. Items must be sorted by value, largest first. */
@@ -192,56 +190,118 @@ function squarify(values: number[], W: number, H: number): Rect[] {
   return out;
 }
 
-const SCALE = ['#fbe3a1', '#e8a361', '#d63f3f', '#b0113c'];
-const bandIndex = (n: number) => PROJECT_BANDS.findIndex((b) => n <= b.max);
-const confBand = (c: number) => (c >= 85 ? 3 : c >= 70 ? 2 : c >= 55 ? 1 : 0);
+const fmtMoney = (n: number) => `$${n.toLocaleString('en-AU')}`;
+const fmtMeasure = (m: Measure, v: number) => (m === 'Investment' ? fmtMoney(v) : m === 'Projects' ? `${v}` : `${v}%`);
 
-/** Treemap of capabilities. The two selectors choose what size and colour represent. */
+/** The filter droplist from the design: a button that opens a list of measures. */
+function Droplist({ label, value, onChange }: { label: string; value: Measure; onChange: (m: Measure) => void }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', away);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  return (
+    <div ref={box} className="relative">
+      <p className="mb-2 text-base text-white">{label}</p>
+      <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${value}`} onClick={() => setOpen((o) => !o)} className="flex h-14 w-full items-center justify-between rounded-t border-b border-outline bg-field px-4 text-left text-base text-white">
+        {value}
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden className="text-[#cac4d0]"><path d="M7 10l5 5 5-5z" /></svg>
+      </button>
+      {open && (
+        <ul role="listbox" aria-label={label} className="absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-2xl bg-field py-3 shadow-xl">
+          {MEASURES.map((m) => (
+            <li key={m} role="option" aria-selected={m === value}>
+              <button type="button" onClick={() => { onChange(m); setOpen(false); }} className={`w-full px-6 py-3.5 text-left text-xl ${m === value ? 'bg-white/10 text-white' : 'text-white hover:bg-white/5'}`}>{m}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** The capability overlay from the design. */
+function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.focus();
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [onClose]);
+  const stat = (m: Measure) => (
+    <div key={m}>
+      <p className="text-sm uppercase tracking-wide text-ink">{m}</p>
+      <p className="text-xl text-ink">{fmtMeasure(m, c[m])}</p>
+    </div>
+  );
+  return (
+    <div ref={ref} tabIndex={-1} role="dialog" aria-label={`${c.name} details`} className="absolute inset-x-0 top-4 z-20 mx-auto w-[min(100%,34rem)] rounded-xl bg-field p-6 shadow-2xl outline-none">
+      <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-white hover:bg-white/10"><X size={26} /></button>
+      <p className="text-base uppercase tracking-wide text-pink">Capabilities &gt; {c.type}</p>
+      <h4 className="mt-1 text-2xl text-white">{c.name}</h4>
+      <p className="mt-3 text-base leading-6 text-[#cac4d0]">{c.text}</p>
+      <div className="mt-6 grid grid-cols-3 gap-x-4 gap-y-5">{MEASURES.map(stat)}</div>
+    </div>
+  );
+}
+
+/** Treemap of capabilities. The two droplists choose what size and colour represent. Selecting a block opens its overlay. */
 function CapabilityChart() {
   const [size, setSize] = useState<Measure>('Investment');
-  const [colour, setColour] = useState<ColourBy>('Projects');
-  const fmt = (n: number) => `$${n.toLocaleString('en-AU')}`;
-  const val = (c: (typeof CAPABILITY_DATA)[number]) => (size === 'Investment' ? c.investment : size === 'Projects' ? c.projects : c.confidence);
-  const label = (c: (typeof CAPABILITY_DATA)[number]) => (size === 'Investment' ? fmt(c.investment) : size === 'Projects' ? `${c.projects} projects` : `${c.confidence}% confidence`);
-  const items = [...CAPABILITY_DATA].sort((a, b) => val(b) - val(a));
+  const [colour, setColour] = useState<Measure>('Projects');
+  const [open, setOpen] = useState<string | null>(null);
+  const items = [...CAPABILITY_DATA].sort((a, b) => b[size] - a[size]);
   const W = 100, H = 62;
-  const rects = squarify(items.map(val), W, H);
-  const colourOf = (c: (typeof CAPABILITY_DATA)[number]) => (colour === 'Projects' ? SCALE[bandIndex(c.projects)] : colour === 'Confidence' ? SCALE[confBand(c.confidence)] : TYPE_COLOURS[c.type]);
-  const legend = colour === 'Projects' ? PROJECT_BANDS.map((b) => ({ label: b.label, colour: b.colour })) : colour === 'Confidence' ? [{ label: 'Under 55%', colour: SCALE[0] }, { label: '55 to 69%', colour: SCALE[1] }, { label: '70 to 84%', colour: SCALE[2] }, { label: '85% and over', colour: SCALE[3] }] : Object.entries(TYPE_COLOURS).map(([label, c]) => ({ label, colour: c }));
+  const rects = squarify(items.map((c) => c[size]), W, H);
+  // Projects use the design's fixed bands. Other measures are split into four equal groups by rank.
+  const ranked = [...CAPABILITY_DATA].sort((a, b) => a[colour] - b[colour]);
+  const rankBand = (c: CapabilityData) => Math.min(3, Math.floor((ranked.indexOf(c) / ranked.length) * 4));
+  const bandOf = (c: CapabilityData) => (colour === 'Projects' ? Math.max(0, PROJECT_BANDS.findIndex((b) => c.Projects <= b.max)) : rankBand(c));
+  const legend = colour === 'Projects'
+    ? PROJECT_BANDS.map((b) => b.label)
+    : [0, 1, 2, 3].map((k) => {
+        const vs = ranked.filter((c) => rankBand(c) === k).map((c) => c[colour]);
+        return `${fmtMeasure(colour, Math.min(...vs))} to ${fmtMeasure(colour, Math.max(...vs))}`;
+      });
+  const current = CAPABILITY_DATA.find((c) => c.name === open) ?? null;
   return (
     <section aria-label="Capability analysis" className="mt-10 border-t border-line pt-8">
       <h3 className="mb-4 text-[22px] text-white">Capability analysis</h3>
       <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
-        <div>
-          <p className="mb-2 text-base text-white">Size represents</p>
-          <Select label="" className="[&_select]:!py-4" options={['Investment', 'Projects', 'Confidence']} value={size} onChange={(e) => setSize(e.target.value as Measure)} aria-label="Size represents" />
-        </div>
-        <div>
-          <p className="mb-2 text-base text-white">Color represents</p>
-          <Select label="" className="[&_select]:!py-4" options={['Projects', 'Capability type', 'Confidence']} value={colour} onChange={(e) => setColour(e.target.value as ColourBy)} aria-label="Color represents" />
-        </div>
+        <Droplist label="Size represents" value={size} onChange={setSize} />
+        <Droplist label="Color represents" value={colour} onChange={setColour} />
       </div>
-      <div className="relative mt-6 aspect-[100/62] w-full max-w-4xl overflow-hidden" role="group" aria-label={`Capabilities sized by ${size.toLowerCase()} and coloured by ${colour.toLowerCase()}`}>
-        {items.map((c, i) => {
-          const r = rects[i];
-          return (
-            <div
-              key={c.name}
-              className="absolute overflow-hidden border border-black/40 p-2 text-black"
-              style={{ left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, background: colourOf(c) }}
-              title={`${c.name.replace(' (authored)', '')}: ${fmt(c.investment)}, ${c.projects} projects, ${c.confidence}% confidence, ${c.type}`}
-              role="img"
-              aria-label={`${c.name.replace(' (authored)', '')}: ${label(c)}`}
-            >
-              <span className="block text-[11px] leading-3 opacity-80">{c.name.replace(' (authored)', '')}</span>
-              <span className="block text-sm">{label(c)}</span>
-            </div>
-          );
-        })}
+      <div className="relative mt-6 max-w-4xl">
+        <div className="relative aspect-[100/62] w-full overflow-hidden" role="group" aria-label={`Capabilities sized by ${size.toLowerCase()} and coloured by ${colour.toLowerCase()}`}>
+          {items.map((c, i) => {
+            const r = rects[i];
+            return (
+              <button
+                key={c.name}
+                type="button"
+                onClick={() => setOpen(open === c.name ? null : c.name)}
+                aria-expanded={open === c.name}
+                aria-label={`${c.name}: ${size} ${fmtMeasure(size, c[size])}. Show details`}
+                className="absolute overflow-hidden border border-black/40 p-2 text-left text-black transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+                style={{ left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, background: SCALE[bandOf(c)] }}
+              >
+                <span className="block text-[11px] leading-3 opacity-80">{c.name}</span>
+                <span className="block text-sm">{fmtMeasure(size, c[size])}</span>
+              </button>
+            );
+          })}
+        </div>
+        {current && <CapabilityOverlay c={current} onClose={() => setOpen(null)} />}
       </div>
       <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink" aria-label="Colour key">
-        {legend.map((l) => (
-          <li key={l.label} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: l.colour }} aria-hidden />{l.label}</li>
+        {legend.map((l, k) => (
+          <li key={l} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: SCALE[k] }} aria-hidden />{l}</li>
         ))}
       </ul>
     </section>
