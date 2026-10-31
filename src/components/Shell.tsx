@@ -146,12 +146,12 @@ export function Shell() {
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-[25] border-b border-line bg-page">
-          <div className="mx-auto flex min-h-16 w-full max-w-[1180px] flex-wrap items-center gap-x-4 gap-y-2 px-6 py-2">
+          <div className="flex min-h-16 w-full flex-wrap items-center gap-x-4 gap-y-2 px-6 py-2">
             <IconButton label="Open menu" onClick={() => setDrawer(true)} className="lg:hidden">
               <Menu size={24} />
             </IconButton>
             <h1 className="t-h1 mr-2 whitespace-nowrap">{title}</h1>
-            <div className="order-last flex w-full lg:order-none lg:w-auto lg:min-w-[220px] lg:flex-1">
+            <div className="order-last flex w-full lg:order-none lg:w-auto lg:min-w-[220px] lg:max-w-[560px] lg:flex-1">
               <SearchBox />
             </div>
             <div className="ml-auto flex items-center gap-1 lg:ml-0">
@@ -169,7 +169,7 @@ export function Shell() {
             </div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1180px] flex-1 px-6">
+        <main className="w-full max-w-[1180px] flex-1 px-6">
           <Outlet />
         </main>
       </div>
