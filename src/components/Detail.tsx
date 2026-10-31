@@ -92,11 +92,13 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
   const [text, setText] = useState('');
   const [sources, setSources] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const seen = useRef(msgs.length);
   const isTyping = !!typing[insight.id];
 
   useEffect(() => {
     if (scrollTo) document.getElementById(`msg-${scrollTo}`)?.scrollIntoView({ block: 'start' });
-    else endRef.current?.scrollIntoView({ block: 'end' });
+    else if (seen.current !== msgs.length || isTyping) endRef.current?.scrollIntoView({ block: 'end' });
+    seen.current = msgs.length;
   }, [msgs.length, isTyping, scrollTo]);
 
   const send = () => {
@@ -107,8 +109,8 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
   const starters = useMemo(() => starterQuestions(insight), [insight]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto py-4 pr-1" role="log" aria-live="polite" aria-label="Chat">
+    <div className="flex flex-col">
+      <div className="flex flex-col gap-6 py-4" role="log" aria-live="polite" aria-label="Chat">
         {msgs.length === 0 && (
           <div className="space-y-3">
             <p className="text-sm text-muted">Ask Arqui about this insight, or try one of these.</p>
@@ -135,7 +137,7 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
         <div ref={endRef} />
       </div>
       <form
-        className="flex shrink-0 items-end gap-2 border-t border-line pt-3"
+        className="sticky bottom-0 z-10 flex shrink-0 items-end gap-2 border-t border-line bg-canvas pb-3 pt-3"
         onSubmit={(e) => { e.preventDefault(); send(); }}
       >
         <textarea
@@ -429,7 +431,7 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
   const chipOrigin = insight.pinned ? null : <Chip origin={insight.origin}>{originLabel[insight.origin]}</Chip>;
 
   return (
-    <article aria-label={insight.title} className={`flex min-h-0 flex-col ${className}`}>
+    <article aria-label={insight.title} className={`flex flex-col ${className}`}>
       <div className="grid shrink-0 grid-cols-[minmax(0,1fr)] gap-4 pb-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0 space-y-2">
           <h2 className="text-lg leading-6 text-teal">{insight.title}</h2>
@@ -469,7 +471,7 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
           </button>
         ))}
       </div>
-      <div id="tabpanel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="min-h-0 flex-1 overflow-y-auto lg:pr-2" style={isChat ? { overflow: 'hidden' } : undefined}>
+      <div id="tabpanel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="flex-1">
         {tab === 'Insight landscape' && <LandscapePanel onOpen={() => setTab('Insight analysis')} />}
         {tab === 'Insight analysis' && <AnalysisPanel />}
         {tab === 'Digital twin' && <TwinPanel />}

@@ -125,8 +125,8 @@ export function Shell() {
   }, [title]);
 
   return (
-    <div className="flex h-dvh bg-canvas">
-      <aside className={`hidden shrink-0 transition-[width] lg:block ${collapsed ? 'w-[96px]' : 'w-[260px]'}`}>
+    <div className="flex min-h-dvh bg-canvas">
+      <aside className={`sticky top-0 hidden h-dvh shrink-0 self-start transition-[width] lg:block ${collapsed ? 'w-[96px]' : 'w-[260px]'}`}>
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} onNavigate={() => undefined} />
       </aside>
       {drawer && (
@@ -137,7 +137,7 @@ export function Shell() {
           </aside>
         </div>
       )}
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 lg:px-6">
           <IconButton label="Open menu" onClick={() => setDrawer(true)} className="lg:hidden">
             <Menu size={22} />
@@ -161,7 +161,7 @@ export function Shell() {
             </IconButton>
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto lg:overflow-hidden">
+        <main className="flex-1">
           <Outlet />
         </main>
       </div>

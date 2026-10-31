@@ -27,13 +27,13 @@ export default function Dashboard() {
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   return (
-    <div className="h-full overflow-y-auto px-4 pb-6 lg:flex lg:flex-col lg:overflow-hidden lg:px-6">
+    <div className="px-4 pb-8 lg:px-6">
       <header className="shrink-0 pb-4">
         <h2 className="text-[28px] leading-9 text-ink">Today’s auto-insights ({todays.length})</h2>
         <p className="mt-1 text-base text-ink">Arqui has generated {todays.length} new insights for you to review today.</p>
       </header>
-      <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(220px,250px)_minmax(0,1fr)]">
-        <aside aria-label="Filters" className="lg:overflow-y-auto lg:pr-2">
+      <div className="grid gap-6 lg:grid-cols-[minmax(220px,250px)_minmax(0,1fr)]">
+        <aside aria-label="Filters" className="lg:pr-2">
           <h3 className="mb-3 text-sm uppercase tracking-wide text-muted">Filters</h3>
           <fieldset>
             <legend className="mb-1 text-base text-ink">Insights about</legend>
@@ -49,7 +49,7 @@ export default function Dashboard() {
             {TYPES.map((t) => <Checkbox key={t.key} label={t.label} checked={types.includes(t.key)} onChange={() => setTypes(toggle(types, t.key))} className="!pl-1" />)}
           </fieldset>
         </aside>
-        <section aria-label="Today’s auto-insights" className="min-h-0 rounded-3xl bg-panel p-4 sm:p-6 lg:overflow-y-auto">
+        <section aria-label="Today’s auto-insights" className="rounded-3xl bg-panel p-4 sm:p-6">
           <ul className="space-y-8">
             {shown.map((i) => (
               <li key={i.id}>

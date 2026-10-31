@@ -66,7 +66,7 @@ export function InsightList({
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   return (
-    <section aria-label="Insights" className={`flex min-h-0 flex-col ${className}`}>
+    <section aria-label="Insights" className={`flex flex-col ${className}`}>
       <div className="relative flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 px-1 pb-3">
         <Button variant="text" onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} className="!px-3 !text-primary">
           <ListFilter size={18} aria-hidden /> Filter insights{active ? ` (${active})` : ''}
@@ -95,7 +95,7 @@ export function InsightList({
         )}
       </div>
       {extraTop}
-      <ul className="min-h-0 flex-1 space-y-2.5 overflow-y-auto pb-4">
+      <ul className="space-y-2.5 pb-4">
         {insights.filter((i) => i.pinned).map((i) => (
           <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
         ))}
