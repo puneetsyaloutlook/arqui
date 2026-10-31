@@ -32,7 +32,7 @@ export function MasterDetail({ area, extraTop, empty }: { area: Area; extraTop?:
   const select = (next: string | null) => setParams(next ? { id: next } : {}, { replace: false });
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 py-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 py-4 lg:grid-cols-[340px_minmax(0,1fr)]">
       <div className={`${selected && !desktop ? 'hidden' : 'flex'} flex-col lg:sticky lg:top-16 lg:-my-4 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-4`}>
         <InsightList area={area} insights={insights} selectedId={selected?.id ?? null} onSelect={select} extraTop={extraTop} className="lg:h-full" />
       </div>

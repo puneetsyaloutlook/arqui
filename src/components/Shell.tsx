@@ -121,7 +121,7 @@ export function Shell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [drawer, setDrawer] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.matchMedia('(max-width: 1439px)').matches);
   const [dialog, setDialog] = useState<null | 'invite' | 'help' | 'account'>(null);
   const [inv, setInv] = useState({ email: '', topic: '', when: '' });
   const title = TITLES[location.pathname] ?? 'Arqui';
@@ -169,7 +169,7 @@ export function Shell() {
             </div>
           </div>
         </header>
-        <main className="w-full max-w-[1180px] flex-1 px-6">
+        <main className="w-full max-w-[1600px] flex-1 px-6">
           <Outlet />
         </main>
       </div>

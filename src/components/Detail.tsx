@@ -11,9 +11,11 @@ export type Tab = string;
 const STANDARD = ['Chat', 'Chat history', 'Chat summary', 'Suggested actions', 'Deliverables', 'Collaborators'];
 const tabsFor = (i: Insight): string[] => {
   if (i.pinned === 'landscape') return ['Insight landscape', 'Insight analysis', 'Chat', 'Chat history', 'Chat summary', 'Collaborators'];
-  if (i.pinned === 'twin') return ['Digital twin', ...STANDARD];
-  if (i.pinned === 'quality') return ['Assessment', ...STANDARD];
-  return i.area === 'org' ? STANDARD.map((t) => (t === 'Suggested actions' ? 'Actions' : t)) : STANDARD;
+  // Organisational views use the shorter "Actions" label, as in the design.
+  const std = i.area === 'org' ? STANDARD.map((t) => (t === 'Suggested actions' ? 'Actions' : t)) : STANDARD;
+  if (i.pinned === 'twin') return ['Digital twin', ...std];
+  if (i.pinned === 'quality') return ['Assessment', ...std];
+  return std;
 };
 
 const download = (name: string, text: string) => {
@@ -473,7 +475,7 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
           </div>
         )}
       </div>
-      <div role="tablist" aria-label="Insight sections" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line">
+      <div role="tablist" aria-label="Insight sections" className="flex shrink-0 flex-wrap border-b border-line">
         {TABS.map((t, i) => (
           <button
             key={t}
@@ -485,7 +487,7 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
             tabIndex={tab === t ? 0 : -1}
             onClick={() => { setTab(t); setScrollTo(null); }}
             onKeyDown={(e) => onKey(e, i)}
-            className={`min-h-11 shrink-0 border-b-[3px] px-3 text-base transition-colors ${tab === t ? 'border-brand font-semibold text-fg' : 'border-transparent font-medium text-fg-2 hover:border-line-strong hover:text-fg'}`}
+            className={`min-h-11 shrink-0 border-b-[3px] px-2.5 text-base transition-colors ${tab === t ? 'border-brand font-semibold text-fg' : 'border-transparent font-medium text-fg-2 hover:border-line-strong hover:text-fg'}`}
           >
             {t}
             {t === 'Collaborators' && collabCount > 0 ? ` (${collabCount})` : ''}
