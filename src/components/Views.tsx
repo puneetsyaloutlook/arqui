@@ -158,40 +158,44 @@ function Confidence({ value }: { value: number }) {
   );
 }
 
+/** Treemap of capabilities. Area is investment and colour is the number of projects. Groups sit side by side, capabilities stack inside each group. */
 function CapabilityChart() {
   const groups = ['Strategic', 'Enabling', 'Core'] as const;
-  const max = Math.max(...CAPABILITY_BUBBLES.map((b) => b.investment));
   const fmt = (n: number) => `$${n.toLocaleString('en-AU')}`;
+  const total = CAPABILITY_BUBBLES.reduce((t, b) => t + b.investment, 0);
   return (
     <section aria-label="Capability analysis" className="mt-10">
       <h3 className="mb-4 text-[22px] text-white">Capability analysis</h3>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {groups.map((g) => (
-          <div key={g} className="rounded-2xl bg-rail p-4">
-            <p className="mb-3 text-sm uppercase tracking-wide text-muted">{g}</p>
-            <ul className="flex flex-wrap items-end gap-3">
-              {CAPABILITY_BUBBLES.filter((b) => b.group === g).map((b) => {
-                const size = 40 + (b.investment / max) * 56;
-                const colour = PROJECT_BANDS[b.band].colour;
-                return (
-                  <li key={b.name} className="flex w-24 flex-col items-center gap-1 text-center">
-                    <span className="grid place-items-center rounded-full text-[11px] font-medium text-black/80" style={{ width: size, height: size, background: colour }} role="img" aria-label={`${b.name}: ${fmt(b.investment)}, ${PROJECT_BANDS[b.band].label}`}>
-                      {fmt(b.investment)}
-                    </span>
-                    <span className="text-xs leading-4 text-ink">{b.name}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+      <div className="flex h-[440px] w-full gap-1 overflow-hidden rounded-xl" role="group" aria-label="Capabilities by investment">
+        {groups.map((g) => {
+          const items = CAPABILITY_BUBBLES.filter((b) => b.group === g);
+          const sum = items.reduce((t, b) => t + b.investment, 0);
+          return (
+            <div key={g} className="flex min-w-0 flex-col gap-1" style={{ flexBasis: `${(sum / total) * 100}%`, flexGrow: 0 }}>
+              <p className="shrink-0 truncate px-1 text-xs uppercase tracking-wide text-muted">{g}</p>
+              {items.sort((x, y) => y.investment - x.investment).map((b) => (
+                <div
+                  key={b.name}
+                  className="flex min-h-0 flex-col justify-between overflow-hidden rounded-md p-2 text-black/85"
+                  style={{ flexBasis: `${(b.investment / sum) * 100}%`, flexGrow: 0, background: PROJECT_BANDS[b.band].colour }}
+                  role="img"
+                  aria-label={`${b.name} in ${g}: ${fmt(b.investment)}, ${PROJECT_BANDS[b.band].label}`}
+                  title={`${b.name}: ${fmt(b.investment)}, ${PROJECT_BANDS[b.band].label}`}
+                >
+                  <span className="text-sm font-medium leading-4">{b.name}</span>
+                  <span className="text-sm">{fmt(b.investment)}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
       <div className="mt-4 flex flex-wrap gap-x-10 gap-y-3 text-sm text-ink">
         <p><span className="text-muted">Size represents</span> Investment</p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span className="text-muted">Colour represents Projects</span>
           {PROJECT_BANDS.map((b) => (
-            <span key={b.label} className="flex items-center gap-2"><span className="size-3 rounded-full" style={{ background: b.colour }} aria-hidden />{b.label}</span>
+            <span key={b.label} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: b.colour }} aria-hidden />{b.label}</span>
           ))}
         </div>
       </div>
