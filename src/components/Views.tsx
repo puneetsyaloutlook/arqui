@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AREA_PATH, type Horizon, type Insight } from '../data/seed';
-import { CAPABILITY_BUBBLES, PERSPECTIVES, PROJECT_BANDS, QUALITY, TWIN_SUMMARY } from '../data/twin';
+import { CAPABILITY_DATA, PERSPECTIVES, PROJECT_BANDS, QUALITY, TWIN_SUMMARY, TYPE_COLOURS } from '../data/twin';
+import { Select } from './ui';
 import { useApp } from '../state/store';
 
 /* ---------- Insight landscape ---------- */
@@ -152,53 +153,97 @@ function Confidence({ value }: { value: number }) {
     <div className="w-40 shrink-0">
       <p className="text-[10px] uppercase tracking-wide text-muted">Confidence level</p>
       <div className="mt-1 h-1 rounded bg-panel-hi" role="img" aria-label={`Confidence ${value} out of 100`}>
-        <div className="h-full rounded bg-teal" style={{ width: `${value}%` }} />
+        <div className="h-full rounded" style={{ width: `${value}%`, background: value >= 70 ? '#00a884' : value >= 50 ? '#7fa32a' : '#c9a227' }} />
       </div>
     </div>
   );
 }
 
-/** Treemap of capabilities. Area is investment and colour is the number of projects. Groups sit side by side, capabilities stack inside each group. */
+type Measure = 'Investment' | 'Projects' | 'Confidence';
+type ColourBy = 'Projects' | 'Capability type' | 'Confidence';
+interface Rect { x: number; y: number; w: number; h: number }
+
+/** Squarified treemap layout in a W by H space. Items must be sorted by value, largest first. */
+function squarify(values: number[], W: number, H: number): Rect[] {
+  const total = values.reduce((a, b) => a + b, 0);
+  const areas = values.map((v) => (v / total) * W * H);
+  const out: Rect[] = [];
+  let x = 0, y = 0, w = W, h = H, i = 0;
+  const worst = (row: number[], side: number) => {
+    const s = row.reduce((a, b) => a + b, 0);
+    return Math.max(...row.map((r) => Math.max((side * side * r) / (s * s), (s * s) / (side * side * r))));
+  };
+  while (i < areas.length) {
+    const side = Math.min(w, h);
+    let row = [areas[i]];
+    let j = i + 1;
+    while (j < areas.length && worst([...row, areas[j]], side) <= worst(row, side)) row = [...row, areas[j++]];
+    const s = row.reduce((a, b) => a + b, 0);
+    const thick = s / side;
+    let off = 0;
+    row.forEach((r) => {
+      const len = r / thick;
+      out.push(w >= h ? { x, y: y + off, w: thick, h: len } : { x: x + off, y, w: len, h: thick });
+      off += len;
+    });
+    if (w >= h) { x += thick; w -= thick; } else { y += thick; h -= thick; }
+    i = j;
+  }
+  return out;
+}
+
+const SCALE = ['#fbe3a1', '#e8a361', '#d63f3f', '#b0113c'];
+const bandIndex = (n: number) => PROJECT_BANDS.findIndex((b) => n <= b.max);
+const confBand = (c: number) => (c >= 85 ? 3 : c >= 70 ? 2 : c >= 55 ? 1 : 0);
+
+/** Treemap of capabilities. The two selectors choose what size and colour represent. */
 function CapabilityChart() {
-  const groups = ['Strategic', 'Enabling', 'Core'] as const;
+  const [size, setSize] = useState<Measure>('Investment');
+  const [colour, setColour] = useState<ColourBy>('Projects');
   const fmt = (n: number) => `$${n.toLocaleString('en-AU')}`;
-  const total = CAPABILITY_BUBBLES.reduce((t, b) => t + b.investment, 0);
+  const val = (c: (typeof CAPABILITY_DATA)[number]) => (size === 'Investment' ? c.investment : size === 'Projects' ? c.projects : c.confidence);
+  const label = (c: (typeof CAPABILITY_DATA)[number]) => (size === 'Investment' ? fmt(c.investment) : size === 'Projects' ? `${c.projects} projects` : `${c.confidence}% confidence`);
+  const items = [...CAPABILITY_DATA].sort((a, b) => val(b) - val(a));
+  const W = 100, H = 62;
+  const rects = squarify(items.map(val), W, H);
+  const colourOf = (c: (typeof CAPABILITY_DATA)[number]) => (colour === 'Projects' ? SCALE[bandIndex(c.projects)] : colour === 'Confidence' ? SCALE[confBand(c.confidence)] : TYPE_COLOURS[c.type]);
+  const legend = colour === 'Projects' ? PROJECT_BANDS.map((b) => ({ label: b.label, colour: b.colour })) : colour === 'Confidence' ? [{ label: 'Under 55%', colour: SCALE[0] }, { label: '55 to 69%', colour: SCALE[1] }, { label: '70 to 84%', colour: SCALE[2] }, { label: '85% and over', colour: SCALE[3] }] : Object.entries(TYPE_COLOURS).map(([label, c]) => ({ label, colour: c }));
   return (
-    <section aria-label="Capability analysis" className="mt-10">
+    <section aria-label="Capability analysis" className="mt-10 border-t border-line pt-8">
       <h3 className="mb-4 text-[22px] text-white">Capability analysis</h3>
-      <div className="flex h-[440px] w-full gap-1 overflow-hidden rounded-xl" role="group" aria-label="Capabilities by investment">
-        {groups.map((g) => {
-          const items = CAPABILITY_BUBBLES.filter((b) => b.group === g);
-          const sum = items.reduce((t, b) => t + b.investment, 0);
+      <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
+        <div>
+          <p className="mb-2 text-base text-white">Size represents</p>
+          <Select label="" className="[&_select]:!py-4" options={['Investment', 'Projects', 'Confidence']} value={size} onChange={(e) => setSize(e.target.value as Measure)} aria-label="Size represents" />
+        </div>
+        <div>
+          <p className="mb-2 text-base text-white">Color represents</p>
+          <Select label="" className="[&_select]:!py-4" options={['Projects', 'Capability type', 'Confidence']} value={colour} onChange={(e) => setColour(e.target.value as ColourBy)} aria-label="Color represents" />
+        </div>
+      </div>
+      <div className="relative mt-6 aspect-[100/62] w-full max-w-4xl overflow-hidden" role="group" aria-label={`Capabilities sized by ${size.toLowerCase()} and coloured by ${colour.toLowerCase()}`}>
+        {items.map((c, i) => {
+          const r = rects[i];
           return (
-            <div key={g} className="flex min-w-0 flex-col gap-1" style={{ flexBasis: `${(sum / total) * 100}%`, flexGrow: 0 }}>
-              <p className="shrink-0 truncate px-1 text-xs uppercase tracking-wide text-muted">{g}</p>
-              {items.sort((x, y) => y.investment - x.investment).map((b) => (
-                <div
-                  key={b.name}
-                  className="flex min-h-0 flex-col justify-between overflow-hidden rounded-md p-2 text-black/85"
-                  style={{ flexBasis: `${(b.investment / sum) * 100}%`, flexGrow: 0, background: PROJECT_BANDS[b.band].colour }}
-                  role="img"
-                  aria-label={`${b.name} in ${g}: ${fmt(b.investment)}, ${PROJECT_BANDS[b.band].label}`}
-                  title={`${b.name}: ${fmt(b.investment)}, ${PROJECT_BANDS[b.band].label}`}
-                >
-                  <span className="text-sm font-medium leading-4">{b.name}</span>
-                  <span className="text-sm">{fmt(b.investment)}</span>
-                </div>
-              ))}
+            <div
+              key={c.name}
+              className="absolute overflow-hidden border border-black/40 p-2 text-black"
+              style={{ left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, background: colourOf(c) }}
+              title={`${c.name.replace(' (authored)', '')}: ${fmt(c.investment)}, ${c.projects} projects, ${c.confidence}% confidence, ${c.type}`}
+              role="img"
+              aria-label={`${c.name.replace(' (authored)', '')}: ${label(c)}`}
+            >
+              <span className="block text-[11px] leading-3 opacity-80">{c.name.replace(' (authored)', '')}</span>
+              <span className="block text-sm">{label(c)}</span>
             </div>
           );
         })}
       </div>
-      <div className="mt-4 flex flex-wrap gap-x-10 gap-y-3 text-sm text-ink">
-        <p><span className="text-muted">Size represents</span> Investment</p>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <span className="text-muted">Colour represents Projects</span>
-          {PROJECT_BANDS.map((b) => (
-            <span key={b.label} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: b.colour }} aria-hidden />{b.label}</span>
-          ))}
-        </div>
-      </div>
+      <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink" aria-label="Colour key">
+        {legend.map((l) => (
+          <li key={l.label} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: l.colour }} aria-hidden />{l.label}</li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -227,9 +272,9 @@ export function TwinPanel() {
         <PerspectiveRing name={name} onSelect={setName} />
         <p className="max-w-xl font-body text-base leading-8 text-white">{TWIN_SUMMARY}</p>
       </div>
-      <div className="mt-10 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <nav aria-label="Perspectives"><List core /><List core={false} /></nav>
-        <div className="rounded-2xl bg-rail p-6">
+      <div className="mt-10 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-0">
+        <nav aria-label="Perspectives" className="lg:-mr-12"><List core /><List core={false} /></nav>
+        <div className="relative z-10 rounded-2xl bg-[#141218] p-6 shadow-xl">
           {p.groups.map((g) => (
             <section key={g.label} className="mb-6 last:mb-0">
               <p className="text-xs uppercase tracking-wide text-pink">{g.label}</p>

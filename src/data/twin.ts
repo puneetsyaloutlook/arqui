@@ -97,24 +97,27 @@ export const PERSPECTIVES: Perspective[] = [
   { name: 'Strategies', core: false, groups: [{ label: 'Strategies > Growth', items: [{ name: 'Global expansion', text: 'Grow into new markets through local partnerships (authored).', confidence: 65 }] }] },
 ];
 
-/** Capability analysis: bubble size is investment, colour is the number of projects. */
+/** Capability analysis: a treemap. Size and colour can each show investment, projects, confidence or capability type. */
 export const PROJECT_BANDS = [
-  { label: '1-5 projects', colour: '#00c2a7' },
-  { label: '5-10 projects', colour: '#8bc34a' },
-  { label: '15-20 projects', colour: '#ffbb33' },
-  { label: '20-25 projects', colour: '#ff693e' },
+  { label: '1-5 projects', max: 5, colour: '#fbe3a1' },
+  { label: '5-10 projects', max: 10, colour: '#e8a361' },
+  { label: '15-20 projects', max: 20, colour: '#d63f3f' },
+  { label: '20-25 projects', max: 25, colour: '#b0113c' },
 ] as const;
 
-export const CAPABILITY_BUBBLES = [
-  { group: 'Strategic', name: 'Innovation management', investment: 1234567, band: 2 },
-  { group: 'Strategic', name: 'Market expansion', investment: 765432, band: 1 },
-  { group: 'Strategic', name: 'Sustainability', investment: 543210, band: 0 },
-  { group: 'Enabling', name: 'Information Technology', investment: 765432, band: 3 },
-  { group: 'Enabling', name: 'Human Resources', investment: 345678, band: 1 },
-  { group: 'Enabling', name: 'Finance and Accounting', investment: 543210, band: 0 },
-  { group: 'Core', name: 'Product development', investment: 1123456, band: 3 },
-  { group: 'Core', name: 'Manufacturing', investment: 765432, band: 2 },
-  { group: 'Core', name: 'Sales & marketing', investment: 456789, band: 1 },
+export const TYPE_COLOURS = { Strategic: '#fbe3a1', Enabling: '#e8a361', Core: '#b0113c' } as const;
+
+export const CAPABILITY_DATA = [
+  { name: 'Innovation management', type: 'Strategic', investment: 1234567, projects: 8, confidence: 70 },
+  { name: 'Product development', type: 'Core', investment: 1123456, projects: 22, confidence: 80 },
+  { name: 'Market expansion', type: 'Strategic', investment: 765432, projects: 4, confidence: 45 },
+  { name: 'Information Technology', type: 'Enabling', investment: 765432, projects: 17, confidence: 85 },
+  { name: 'Manufacturing', type: 'Core', investment: 765432, projects: 18, confidence: 75 },
+  { name: 'Sustainability', type: 'Strategic', investment: 543210, projects: 3, confidence: 60 },
+  { name: 'Finance and Accounting', type: 'Enabling', investment: 543210, projects: 6, confidence: 90 },
+  { name: 'Supply chain and logistics (authored)', type: 'Core', investment: 543210, projects: 16, confidence: 65 },
+  { name: 'Sales & marketing', type: 'Core', investment: 456789, projects: 9, confidence: 65 },
+  { name: 'Human Resources', type: 'Enabling', investment: 345678, projects: 7, confidence: 55 },
 ] as const;
 
 export const QUALITY = {
