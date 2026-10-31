@@ -67,14 +67,14 @@ export function InsightList({
 
   return (
     <section aria-label="Insights" className={`flex flex-col ${className}`}>
-      <div className="relative flex shrink-0 flex-wrap items-center gap-x-1 gap-y-2 pb-3">
-        <Button variant="tertiary" onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen}>
-          <ListFilter size={20} aria-hidden /> Filter insights{active ? ` (${active})` : ''}
+      <div className="relative flex shrink-0 flex-nowrap items-center gap-x-1 pb-3">
+        <Button variant="tertiary" onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} aria-label={`Filter insights${active ? `, ${active} applied` : ''}`} className="!px-2 whitespace-nowrap">
+          <ListFilter size={20} aria-hidden /> Filter{active ? ` (${active})` : ''}
         </Button>
-        <Button variant="tertiary" onClick={() => setSort((s) => (s === 'date' ? 'title' : 'date'))}>
+        <Button variant="tertiary" onClick={() => setSort((s) => (s === 'date' ? 'title' : 'date'))} className="!px-2 whitespace-nowrap">
           Sort by: {sort === 'date' ? 'Date' : 'Title'}
         </Button>
-        <Button variant="primary" className="ml-auto" onClick={() => setChat('')}>
+        <Button variant="primary" className="ml-auto !px-4 whitespace-nowrap" onClick={() => setChat('')}>
           <Plus size={20} aria-hidden /> Start new chat
         </Button>
         {filterOpen && (
