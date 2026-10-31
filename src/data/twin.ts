@@ -8,6 +8,8 @@ export interface TwinItem {
   name: string;
   text: string;
   confidence: number; // 0 to 100
+  /** Reviewers who have validated the item, out of 4. */
+  reviewers?: number;
 }
 export interface TwinGroup {
   label: string;
@@ -50,52 +52,69 @@ export const PERSPECTIVES: Perspective[] = [
       },
     ],
   },
-  {
-    name: 'Organisation',
-    core: true,
-    groups: [
-      {
-        label: 'Organisation > Structure',
-        items: [
-          { name: 'Flat hierarchy', text: 'Few management layers, with decisions made close to the work (authored).', confidence: 80 },
-          { name: 'Regional teams', text: 'Operating units in North America, Europe and Southeast Asia (authored).', confidence: 60 },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Information',
-    core: true,
-    groups: [
-      {
-        label: 'Information > Data and analytics',
-        items: [
-          { name: 'Customer data', text: 'Customer records held in the CRM, with sales and service data in separate systems (authored).', confidence: 70 },
-          { name: 'Operational data', text: 'Production and inventory data collected from facility systems (authored).', confidence: 65 },
-        ],
-      },
-    ],
-  },
-  {
-    name: 'Value streams',
-    core: true,
-    groups: [
-      {
-        label: 'Value streams > Customer-facing',
-        items: [
-          { name: 'Sales and marketing to customer service', text: 'From first enquiry through installation and after-sales support (authored).', confidence: 60 },
-          { name: 'Product development to manufacturing', text: 'From design and testing through to production and quality control (authored).', confidence: 75 },
-        ],
-      },
-    ],
-  },
-  { name: 'Stakeholders', core: false, groups: [{ label: 'Stakeholders > External', items: [{ name: 'Research partners', text: 'Universities and institutes that collaborate on materials research (authored).', confidence: 70 }, { name: 'Distributors', text: 'Local partners in new international markets (authored).', confidence: 50 }] }] },
-  { name: 'Policies', core: false, groups: [{ label: 'Policies > Governance', items: [{ name: 'IT security and data privacy', text: 'Policies for IT security, data privacy and compliance (authored).', confidence: 75 }] }] },
-  { name: 'Product & Service', core: false, groups: [{ label: 'Product & Service > Products', items: [{ name: 'SunPro solar panels', text: 'Core product line for commercial and residential customers (authored).', confidence: 90 }, { name: 'Battery storage', text: 'Under exploration as a future offering (authored).', confidence: 40 }] }] },
-  { name: 'Metrics and KPIs', core: false, groups: [{ label: 'Metrics and KPIs > Innovation', items: [{ name: 'Innovation KPIs', text: 'Innovation output and project completion rates (authored).', confidence: 55 }] }] },
-  { name: 'Initiatives', core: false, groups: [{ label: 'Initiatives > Strategic', items: [{ name: 'Solar panel recycling program', text: 'Eco-friendly recycling of end-of-life panels (authored).', confidence: 60 }] }] },
-  { name: 'Strategies', core: false, groups: [{ label: 'Strategies > Growth', items: [{ name: 'Global expansion', text: 'Grow into new markets through local partnerships (authored).', confidence: 65 }] }] },
+  P('Organisation', true, 'Organisation > Structure', [
+    ['Flat hierarchy', 'Few management layers, with decisions made close to the work.', 80],
+    ['Regional operating units', 'Operating units in North America, Europe and Southeast Asia.', 60],
+    ['Cross-functional product teams', 'Engineering, manufacturing and sales work together on each product line.', 70, 3],
+  ]),
+  P('Information', true, 'Information > Data and analytics', [
+    ['Customer records', 'Customer and sales records held in the CRM.', 70],
+    ['Production and inventory data', 'Data collected from production lines and warehouses.', 65, 3],
+    ['Financial reporting data', 'Ledgers, forecasts and investor reporting held in the ERP.', 90],
+    ['Employee and HR data', 'Headcount, skills and engagement survey data.', 55, 3],
+    ['Market and competitor research', 'Industry analyses and market research reports.', 50, 2],
+    ['Research and patent library', 'Research papers, test results and patent filings.', 75],
+  ]),
+  P('Value streams', true, 'Value streams > Customer-facing', [
+    ['Sales and marketing to customer service', 'From first enquiry through installation and after-sales support.', 60],
+    ['Product development to manufacturing', 'From design and testing through to production and quality control.', 75],
+    ['Order to delivery', 'From confirmed order through production, shipping and handover.', 70],
+    ['Installation and after-sales service', 'Fitting, commissioning, warranty and maintenance.', 55, 3],
+    ['Procure to pay', 'From supplier selection through purchase orders to payment.', 65],
+    ['Recruit to onboard', 'From role approval through hiring to a person\'s first 90 days.', 50, 2],
+  ]),
+  P('Stakeholders', false, 'Stakeholders > External and internal', [
+    ['Residential and commercial customers', 'Buyers and installers of SunPro solar panels.', 75],
+    ['Investors', 'Shareholders and lenders who fund expansion.', 70],
+    ['Employees', 'Staff across engineering, manufacturing, sales and support.', 65, 3],
+    ['Research partners', 'Universities and institutes that collaborate on materials research.', 70],
+    ['Distributors', 'Local partners in new international markets.', 50, 2],
+    ['Regulators', 'Energy, data privacy and environmental authorities in key markets.', 60],
+  ]),
+  P('Strategies', false, 'Strategies > Growth and capability', [
+    ['Global expansion', 'Grow into new markets through local partnerships.', 65],
+    ['Innovation leadership', 'Lead on next-generation solar panel technology.', 70],
+    ['Sustainability and circular economy', 'Reduce the carbon footprint and recycle end-of-life panels.', 60],
+    ['Battery storage entry', 'Explore battery storage as a new product line.', 40, 2],
+    ['Digital transformation', 'Move to cloud platforms and data-driven decisions.', 75],
+    ['Talent development', 'Attract, develop and keep specialist skills.', 55, 3],
+  ]),
+  P('Product & Service', false, 'Product & Service > Offerings', [
+    ['SunPro solar panels', 'Core product line for commercial and residential customers.', 90],
+    ['Installation services', 'Fitting and commissioning through partner installers.', 60],
+    ['Battery storage', 'Planned offering that is under exploration.', 40, 2],
+  ]),
+  P('Policies', false, 'Policies > Governance', [
+    ['IT security and data privacy', 'Rules for protecting systems and personal data.', 75],
+    ['Procurement and supplier code', 'Standards for selecting and managing suppliers.', 65],
+    ['Environmental, social and governance', 'Commitments and reporting on sustainability and ethics.', 60, 3],
+  ]),
+  P('Initiatives', false, 'Initiatives > Strategic', [
+    ['Solar panel recycling program', 'Eco-friendly recycling of end-of-life panels.', 60],
+    ['Southeast Asia market entry', 'Distributor partnerships and local compliance work.', 45, 3],
+    ['Cloud migration', 'Moving core systems to cloud infrastructure.', 70],
+  ]),
+  P('Metrics and KPIs', false, 'Metrics and KPIs > Performance', [
+    ['Innovation output', 'New products and patents delivered per year.', 55],
+    ['Customer satisfaction', 'Survey scores and first-contact resolution.', 60, 3],
+    ['Carbon footprint reduction', 'Emissions across operations and the supply chain.', 65],
+  ]),
 ];
+
+/** Shorthand used above. Items are authored for this prototype where the design does not show them. */
+function P(name: string, core: boolean, label: string, rows: [string, string, number, number?][]): Perspective {
+  return { name, core, groups: [{ label, items: rows.map(([n, text, confidence, reviewers]) => ({ name: n, text, confidence, reviewers: reviewers ?? 4 })) }] };
+}
 
 /** Capability analysis: a treemap. The measures match the filter droplist in the design. */
 export const MEASURES = ['Investment', 'Projects', 'Maturity', 'Capacity', 'Utilisation'] as const;

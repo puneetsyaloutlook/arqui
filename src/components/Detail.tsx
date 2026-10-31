@@ -3,7 +3,7 @@ import { BadgeCheck, Bookmark, Download, Pencil, RefreshCw, Send, Share2, Trash2
 import { SCRIPTED, actionsFor, deliverablesFor, reportFor, summaryFor, starterQuestions } from '../data/chat';
 import { AREA_LABEL, type Insight } from '../data/seed';
 import { useApp, type Message } from '../state/store';
-import { LandscapePanel, AnalysisPanel, TwinPanel, QualityPanel } from './Views';
+import { LandscapePanel, AnalysisPanel, TwinPanel, TwinModal, QualityPanel } from './Views';
 import { Button, Chip, CollabChip, IconButton, Modal, RichText, Select, TextArea, TextField, originLabel } from './ui';
 
 export type Tab = string;
@@ -51,7 +51,7 @@ function SourcesModal({ insight, onClose }: { insight: Insight; onClose: () => v
 
 /* ---------- Chat ---------- */
 
-function MessageView({ m, insight, onEdit, onRegenerate, onSources }: { m: Message; insight: Insight; onEdit: () => void; onRegenerate: () => void; onSources: () => void }) {
+function MessageView({ m, insight, onEdit, onRegenerate, onSources, onTwin }: { m: Message; insight: Insight; onEdit: () => void; onRegenerate: () => void; onSources: () => void; onTwin: () => void }) {
   const { toast } = useApp();
   if (m.role === 'user') {
     return (
@@ -63,24 +63,43 @@ function MessageView({ m, insight, onEdit, onRegenerate, onSources }: { m: Messa
       </div>
     );
   }
+  const org = insight.area === 'org';
+  const exportIt = () => { void navigator.clipboard?.writeText((m.lines ?? []).join('\n')); toast('Response copied to clipboard'); };
   return (
-    <div id={`msg-${m.id}`} className="max-w-3xl">
-      <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink"><span className="grid size-4 place-items-center rounded-sm bg-ink/20 text-[10px]">A</span> Arqui</span>
-      <div className="mt-1">
-        <RichText lines={m.lines ?? []} />
+    <div id={`msg-${m.id}`} className="grid gap-4 lg:grid-cols-[minmax(0,48rem)_minmax(0,12rem)]">
+      <div>
+        <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink"><span className="grid size-4 place-items-center rounded-sm bg-ink/20 text-[10px]">A</span> Arqui</span>
+        <div className="mt-1">
+          <RichText lines={m.lines ?? []} />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          {!org && (
+            <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={exportIt}>
+              <Share2 size={14} aria-hidden /> Export response
+            </button>
+          )}
+          {!org && (
+            <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onSources}>
+              <BadgeCheck size={14} aria-hidden /> Check sources
+            </button>
+          )}
+          <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onRegenerate}>
+            <RefreshCw size={14} aria-hidden /> Regenerate
+          </button>
+        </div>
+        <span className="sr-only">{insight.title}</span>
       </div>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-        <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={() => { void navigator.clipboard?.writeText((m.lines ?? []).join('\n')); toast('Response copied to clipboard'); }}>
-          <Share2 size={14} aria-hidden /> Export response
-        </button>
-        <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onSources}>
-          <BadgeCheck size={14} aria-hidden /> Check sources
-        </button>
-        <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onRegenerate}>
-          <RefreshCw size={14} aria-hidden /> Regenerate
-        </button>
-      </div>
-      <span className="sr-only">{insight.title}</span>
+      {org && (
+        <aside aria-label="Sources" className="text-sm text-ink">
+          <h4 className="text-sm">Sources</h4>
+          <ul className="mt-1 list-disc pl-5 marker:text-primary">
+            <li><button type="button" onClick={onTwin} className="text-base text-primary hover:underline">Digital twin</button></li>
+          </ul>
+          <button type="button" onClick={exportIt} className="mt-3 inline-flex items-center gap-2 text-primary hover:underline">
+            <Share2 size={16} aria-hidden /> Export
+          </button>
+        </aside>
+      )}
     </div>
   );
 }
@@ -91,6 +110,7 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
   void SCRIPTED;
   const [text, setText] = useState('');
   const [sources, setSources] = useState(false);
+  const [twin, setTwin] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const seen = useRef(msgs.length);
   const isTyping = !!typing[insight.id];
@@ -131,6 +151,7 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
             onEdit={() => setText(editQuestion(insight.id, m.id))}
             onRegenerate={() => regenerate(insight.id, m.id)}
             onSources={() => setSources(true)}
+            onTwin={() => setTwin(true)}
           />
         ))}
         {isTyping && <p className="text-sm text-muted" role="status">Arqui is thinking...</p>}
@@ -154,6 +175,7 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
         </IconButton>
       </form>
       {sources && <SourcesModal insight={insight} onClose={() => setSources(false)} />}
+      {twin && <TwinModal onClose={() => setTwin(false)} />}
     </div>
   );
 }

@@ -226,7 +226,7 @@ function Droplist({ label, value, onChange }: { label: string; value: Measure; o
 }
 
 /** The capability overlay from the design. */
-function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => void }) {
+function CapabilityOverlayCard({ c, onClose, className = '' }: { c: CapabilityData; onClose: () => void; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.focus();
@@ -241,7 +241,7 @@ function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => v
     </div>
   );
   return (
-    <div ref={ref} tabIndex={-1} role="dialog" aria-label={`${c.name} details`} className="absolute inset-x-0 top-4 z-20 mx-auto w-[min(100%,34rem)] rounded-xl bg-field p-6 shadow-2xl outline-none">
+    <div ref={ref} tabIndex={-1} role="dialog" aria-label={`${c.name} details`} className={`relative rounded-xl bg-field p-6 shadow-2xl outline-none ${className}`}>
       <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-white hover:bg-white/10"><X size={26} /></button>
       <p className="text-base uppercase tracking-wide text-pink">Capabilities &gt; {c.type}</p>
       <h4 className="mt-1 text-2xl text-white">{c.name}</h4>
@@ -249,6 +249,10 @@ function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => v
       <div className="mt-6 grid grid-cols-3 gap-x-4 gap-y-5">{MEASURES.map(stat)}</div>
     </div>
   );
+}
+
+function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => void }) {
+  return <div className="absolute inset-x-0 top-4 z-20 mx-auto w-[min(100%,34rem)]"><CapabilityOverlayCard c={c} onClose={onClose} /></div>;
 }
 
 /** Treemap of capabilities. The two droplists choose what size and colour represent. Selecting a block opens its overlay. */
@@ -409,6 +413,111 @@ export function QualityPanel() {
         <h4 className="mb-2 mt-8 font-medium">Source Credibility</h4>
         <p>{q.transparency.credibility}</p>
       </section>
+    </div>
+  );
+}
+
+/* ---------- Digital twin panel (opened from Sources in a chat answer) ---------- */
+
+const ADMIN = 'Alex Bizarcher';
+
+function Reviewers({ n }: { n: number }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-wide text-muted">{n} of 4 reviewers</p>
+      <div className="mt-1 flex gap-1" aria-hidden>
+        {[0, 1, 2, 3].map((i) => <span key={i} className={`h-1 w-6 rounded ${i < n ? 'bg-teal' : 'bg-panel-hi'}`} />)}
+      </div>
+    </div>
+  );
+}
+
+export function TwinModal({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState('Capabilities');
+  const [detail, setDetail] = useState<{ name: string; label: string; text: string; confidence: number; reviewers: number } | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    ref.current?.focus();
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', esc);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', esc); document.body.style.overflow = overflow; prev?.focus?.(); };
+  }, [onClose]);
+
+  const count = (p: (typeof PERSPECTIVES)[number]) => p.groups.reduce((n, g) => n + g.items.length, 0);
+  const all = PERSPECTIVES.flatMap((p) => p.groups.flatMap((g) => g.items));
+  const overall = Math.round(all.reduce((n, i) => n + i.confidence, 0) / all.length);
+  const p = PERSPECTIVES.find((x) => x.name === name) ?? PERSPECTIVES[0];
+  const cap = detail ? CAPABILITY_DATA.find((c) => c.name === detail.name) : undefined;
+
+  const Nav = ({ core }: { core: boolean }) => (
+    <>
+      <h3 className={`text-xl text-white ${core ? '' : 'mt-6'}`}>{core ? 'Core' : 'Extended'}</h3>
+      <ul className="mt-2 space-y-1">
+        {PERSPECTIVES.filter((x) => x.core === core).map((x) => (
+          <li key={x.name}>
+            <button type="button" onClick={() => setName(x.name)} aria-pressed={x.name === name} className={`w-full rounded-full px-3 py-1.5 text-left text-base ${x.name === name ? 'bg-black font-medium text-white' : 'text-primary hover:bg-white/5'}`}>
+              {x.name} ({count(x)})
+            </button>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Digital twin" className="relative w-full max-w-[1110px] rounded-2xl bg-panel pb-6 outline-none">
+        <header className="flex items-center justify-between rounded-t-2xl bg-[#2b2930] px-5 py-4 sm:px-6">
+          <h2 className="text-2xl text-white">Digital twin</h2>
+          <button type="button" onClick={onClose} className="inline-flex h-12 items-center gap-2 rounded-full border border-outline px-6 text-base text-white hover:bg-white/10"><X size={18} aria-hidden /> Close</button>
+        </header>
+        <div className="grid gap-6 px-5 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="font-body text-base leading-6 text-white">
+            <p>The admin for the digital twin is <span className="text-primary">{ADMIN}</span>.</p>
+            <p>{TWIN_SUMMARY.replace('organization', 'organisation')}</p>
+          </div>
+          <dl className="flex gap-8 border-l border-line pl-6 md:flex-col md:gap-3">
+            <div><dd className="inline text-[28px] text-ink">{all.length}</dd> <dt className="inline text-sm uppercase text-ink">Perspectives</dt></div>
+            <div><dd className="inline text-[28px] text-ink">{overall}%</dd> <dt className="inline text-sm text-ink">Overall confidence</dt></div>
+          </dl>
+        </div>
+        <div className="grid gap-4 px-5 sm:px-6 md:grid-cols-[200px_minmax(0,1fr)]">
+          <nav aria-label="Perspectives"><Nav core /><Nav core={false} /></nav>
+          <section aria-label={p.name} className="rounded-xl bg-[#202125] p-4 sm:p-6">
+            <h3 className="mb-5 text-xl text-white">{p.core ? 'Core' : 'Extended'} &gt; {p.name} <span className="ml-2 text-sm uppercase text-pink">{count(p)} perspectives</span></h3>
+            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {p.groups.flatMap((g) => g.items.map((i) => ({ g, i }))).map(({ g, i }) => (
+                <li key={i.name} className="flex flex-col rounded-lg bg-[#141218] p-4">
+                  <p className="text-xs uppercase tracking-wide text-pink">{g.label}</p>
+                  <h4 className="mt-2 text-lg text-white">{i.name}</h4>
+                  <p className="mt-1 flex-1 text-sm leading-5 text-[#cac4d0]">{i.text}</p>
+                  <div className="mt-4"><Confidence value={i.confidence} /></div>
+                  <div className="mt-3"><Reviewers n={i.reviewers ?? 4} /></div>
+                  <button type="button" onClick={() => setDetail({ name: i.name, label: g.label, text: i.text, confidence: i.confidence, reviewers: i.reviewers ?? 4 })} aria-label={`Details: ${i.name}`} className="mt-4 h-10 self-start rounded-full border border-outline px-6 text-sm text-white hover:bg-white/10">Details</button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+        {detail && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onMouseDown={(e) => e.target === e.currentTarget && setDetail(null)}>
+            {cap ? (
+              <div className="relative w-full max-w-lg"><CapabilityOverlayCard c={cap} onClose={() => setDetail(null)} /></div>
+            ) : (
+              <div role="dialog" aria-label={`${detail.name} details`} className="relative w-full max-w-lg rounded-xl bg-field p-6 shadow-2xl">
+                <button type="button" onClick={() => setDetail(null)} aria-label="Close" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-white hover:bg-white/10"><X size={26} /></button>
+                <p className="text-base uppercase tracking-wide text-pink">{detail.label}</p>
+                <h4 className="mt-1 text-2xl text-white">{detail.name}</h4>
+                <p className="mt-3 text-base leading-6 text-[#cac4d0]">{detail.text}</p>
+                <div className="mt-6 grid gap-5 sm:grid-cols-2"><Confidence value={detail.confidence} /><Reviewers n={detail.reviewers} /></div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
