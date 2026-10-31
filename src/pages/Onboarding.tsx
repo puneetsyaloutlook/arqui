@@ -1,69 +1,93 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Logo } from '../components/Shell';
-import { Button, Checkbox, Select, TextArea, TextField } from '../components/ui';
-import { THEMES } from '../data/seed';
+import { AuthLayout } from '../components/AuthLayout';
+import { Button, Checkbox, Select, TextField } from '../components/ui';
+import { DEPARTMENTS, INTERESTS, JOB_TITLES, describeRole } from '../data/roles';
 import { useApp } from '../state/store';
-
-const DEPARTMENTS = ['Finance', 'Operations', 'Technology', 'People and culture', 'Strategy', 'Customer service', 'Risk and compliance'];
 
 export default function Onboarding() {
   const { state, saveProfile } = useApp();
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<'about' | 'role'>('about');
   const [p, setP] = useState(state.profile);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [thinking, setThinking] = useState(false);
+  const [desc, setDesc] = useState(state.profile.roleNotes);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const next = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step === 0) {
-      const err: Record<string, string> = {};
-      if (!p.name.trim()) err.name = 'Enter your name.';
-      if (!p.department) err.department = 'Choose a department.';
-      setErrors(err);
-      if (Object.keys(err).length) return;
-      saveProfile(p);
-      return setStep(1);
-    }
-    if (!p.jobTitle.trim()) return setErrors({ jobTitle: 'Enter your job title.' });
-    saveProfile(p, true);
-    navigate('/dashboard', { replace: true });
-  };
+  const set = (patch: Partial<typeof p>) => { setP({ ...p, ...patch }); setErrors({}); };
   const toggle = (t: string) => setP({ ...p, interests: p.interests.includes(t) ? p.interests.filter((x) => x !== t) : [...p.interests, t] });
 
+  const saveAbout = (e: React.FormEvent) => {
+    e.preventDefault();
+    const err: Record<string, string> = {};
+    if (!p.name.trim()) err.name = 'Enter your name.';
+    if (!p.department) err.department = 'Choose your department or group.';
+    if (!p.jobTitle) err.jobTitle = 'Choose your job title.';
+    setErrors(err);
+    if (Object.keys(err).length) return;
+    saveProfile(p);
+    setThinking(true);
+    setStep('role');
+    timer.current = window.setTimeout(() => {
+      setDesc(describeRole(p.jobTitle, p.department));
+      setThinking(false);
+    }, 1400);
+  };
+  const saveRole = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveProfile({ ...p, roleNotes: desc }, true);
+    navigate('/dashboard', { replace: true });
+  };
+
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-canvas p-4">
-      <div className="w-full max-w-xl rounded-3xl bg-panel p-8 shadow-2xl">
-        <Logo />
-        <p className="mt-6 text-xs uppercase tracking-wide text-muted">Step {step + 1} of 2</p>
-        <h1 className="text-2xl text-white">{step === 0 ? 'About you' : 'Your role'}</h1>
-        <form onSubmit={next} className="mt-6 space-y-4" noValidate>
-          {step === 0 ? (
-            <>
-              <TextField label="Full name" autoComplete="name" autoFocus value={p.name} error={errors.name} onChange={(e) => setP({ ...p, name: e.target.value })} />
+    <AuthLayout title="Before we start">
+      {step === 'about' ? (
+        <form onSubmit={saveAbout} noValidate className="mt-8 font-body">
+          <p className="text-base text-white">To provide the most relevant insights, we'll need some information about you and your role at Acme:</p>
+          <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,350px)_minmax(0,1fr)] lg:gap-16">
+            <div className="space-y-4">
+              <h2 className="text-[28px] text-white">About you</h2>
+              <TextField label="Your name" autoComplete="name" autoFocus value={p.name} error={errors.name} onChange={(e) => set({ name: e.target.value })} />
               <div>
-                <Select label="Department" options={DEPARTMENTS} value={p.department} onChange={(e) => setP({ ...p, department: e.target.value })} />
+                <Select label="Your department/group" options={DEPARTMENTS} value={p.department} onChange={(e) => set({ department: e.target.value })} />
                 {errors.department && <p role="alert" className="mt-1 px-4 text-xs text-[#f2b8b5]">{errors.department}</p>}
               </div>
-            </>
-          ) : (
-            <>
-              <TextField label="Job title" autoFocus value={p.jobTitle} error={errors.jobTitle} onChange={(e) => setP({ ...p, jobTitle: e.target.value })} />
-              <fieldset>
-                <legend className="mb-1 text-sm text-muted">Which themes matter most to you?</legend>
-                <div className="grid gap-x-4 sm:grid-cols-2">
-                  {[...THEMES, ...state.customThemes].map((t) => <Checkbox key={t} label={t} checked={p.interests.includes(t)} onChange={() => toggle(t)} />)}
-                </div>
-              </fieldset>
-              <TextArea label="Anything else Arqui should know about your role? (optional)" value={p.roleNotes} onChange={(e) => setP({ ...p, roleNotes: e.target.value })} />
-            </>
-          )}
-          <div className="flex items-center justify-between pt-2">
-            {step === 1 ? <Button variant="text" onClick={() => setStep(0)}>Back</Button> : <span />}
-            <Button variant="filled" type="submit">{step === 0 ? 'Next' : 'Finish'}</Button>
+              <div>
+                <Select label="Your job title" options={JOB_TITLES} value={p.jobTitle} onChange={(e) => set({ jobTitle: e.target.value })} />
+                {errors.jobTitle && <p role="alert" className="mt-1 px-4 text-xs text-[#f2b8b5]">{errors.jobTitle}</p>}
+              </div>
+              <Button variant="filled" type="submit">Save</Button>
+            </div>
+            <fieldset>
+              <legend className="mb-4 text-[28px] text-white">Areas of interest</legend>
+              <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                {INTERESTS.map((t) => <Checkbox key={t} label={t} checked={p.interests.includes(t)} onChange={() => toggle(t)} className="!text-white" />)}
+              </div>
+            </fieldset>
           </div>
         </form>
-      </div>
-    </main>
+      ) : (
+        <form onSubmit={saveRole} className="mt-8 font-body">
+          <h2 className="text-[28px] text-white">Your role</h2>
+          <p className="mt-4 max-w-[58rem] text-base leading-7 text-white">
+            Based on the information you entered, this is what Arqui understands about your role. Is this understanding of your role accurate? Please edit or provide further details about your specific responsibilities and areas of focus within the {p.jobTitle} role at Acme.
+          </p>
+          {thinking ? (
+            <div role="status" className="mt-6 flex h-72 items-center justify-center rounded-lg bg-[#222] text-base text-muted">Arqui is working out what your role involves...</div>
+          ) : (
+            <>
+              <label htmlFor="role-desc" className="sr-only">Role description</label>
+              <textarea id="role-desc" value={desc} onChange={(e) => setDesc(e.target.value)} rows={12} className="mt-6 w-full resize-y rounded-lg bg-[#222] p-3 text-[15px] leading-6 text-white outline-none focus:ring-2 focus:ring-primary" />
+            </>
+          )}
+          <div className="mt-6 flex gap-2">
+            <Button variant="text" onClick={() => setStep('about')} disabled={thinking}>Back</Button>
+            <Button variant="filled" type="submit" disabled={thinking || !desc.trim()}>Save</Button>
+          </div>
+        </form>
+      )}
+    </AuthLayout>
   );
 }

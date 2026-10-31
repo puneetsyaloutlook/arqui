@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import bg from '../assets/ui/bg.jpg';
 import apple from '../assets/ui/apple.png';
 import google from '../assets/ui/google.png';
 import microsoft from '../assets/ui/microsoft.png';
 import slack from '../assets/ui/slack.png';
-import { Logo } from '../components/Shell';
+import { AuthLayout } from '../components/AuthLayout';
 import { Button, Checkbox, TextField } from '../components/ui';
 import { useApp } from '../state/store';
+
+const PROVIDERS = [
+  { name: 'Microsoft', img: microsoft },
+  { name: 'Google', img: google },
+  { name: 'Apple', img: apple },
+  { name: 'Slack', img: slack },
+];
 
 export default function SignIn() {
   const { state, signIn } = useApp();
   const navigate = useNavigate();
-  const [step, setStep] = useState<'email' | 'password'>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(true);
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
 
   if (state.email) return <Navigate to={state.onboarded ? '/dashboard' : '/onboarding'} replace />;
@@ -24,55 +28,43 @@ export default function SignIn() {
     signIn(who);
     navigate(state.onboarded ? '/dashboard' : '/onboarding', { replace: true });
   };
-  const next = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 'email') {
-      if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Enter a valid email address.');
-      setError('');
-      return setStep('password');
-    }
-    if (password.length < 4) return setError('Enter your password (at least 4 characters in this demo).');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Enter a valid email address.');
     finish(email);
   };
 
-  const providers = [
-    { name: 'Microsoft', img: microsoft },
-    { name: 'Google', img: google },
-    { name: 'Apple', img: apple },
-    { name: 'Slack', img: slack },
-  ];
-
   return (
-    <main className="relative flex min-h-dvh items-center justify-center bg-canvas bg-cover bg-center p-4" style={{ backgroundImage: `url(${bg})` }}>
-      <div className="absolute inset-0 bg-black/40" aria-hidden />
-      <div className="relative w-full max-w-md rounded-3xl bg-panel/95 p-8 shadow-2xl backdrop-blur">
-        <Logo className="block text-center" />
-        <h1 className="mt-6 text-2xl text-white">Sign in</h1>
-        <p className="mt-1 text-sm text-muted">{step === 'email' ? 'Use your work email to continue.' : `Signing in as ${email}`}</p>
-        <form onSubmit={next} className="mt-6 space-y-4" noValidate>
-          {step === 'email' ? (
+    <AuthLayout title="Sign in" translucent>
+      <div className="mt-8 grid gap-10 lg:mt-12 lg:grid-cols-[minmax(0,330px)_minmax(0,1fr)] lg:gap-16 lg:px-6">
+        <div>
+          <form onSubmit={submit} noValidate className="space-y-4">
             <TextField label="Email" type="email" autoComplete="username" autoFocus value={email} error={error} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
-          ) : (
-            <TextField label="Password" type="password" autoComplete="current-password" autoFocus value={password} error={error} onChange={(e) => { setPassword(e.target.value); setError(''); }} />
-          )}
-          {step === 'password' && <Checkbox label="Remember this device" checked={remember} onChange={(e) => setRemember(e.target.checked)} />}
-          <div className="flex items-center justify-between gap-2">
-            {step === 'password' ? <Button variant="text" onClick={() => { setStep('email'); setError(''); }}>Back</Button> : <span />}
-            <Button variant="filled" type="submit">{step === 'email' ? 'Next' : 'Sign in'}</Button>
-          </div>
-        </form>
-        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-muted">
-          <span className="h-px flex-1 bg-line" /> or continue with <span className="h-px flex-1 bg-line" />
+            <Checkbox label="Remember on this device" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="!text-primary" />
+            <Button variant="filled" type="submit">Continue</Button>
+          </form>
+          <hr className="my-6 border-line" />
+          <p className="mb-4 text-base text-white">Or sign in with</p>
+          <ul className="flex gap-6">
+            {PROVIDERS.map((p) => (
+              <li key={p.name}>
+                <button type="button" onClick={() => finish(`${p.name.toLowerCase()}.user@acme.com`)} className="flex w-16 flex-col items-center gap-1 rounded-lg py-1 text-xs text-white hover:bg-white/10">
+                  <img src={p.img} alt="" className="size-8 object-contain" />
+                  {p.name}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {providers.map((p) => (
-            <Button key={p.name} onClick={() => finish(`${p.name.toLowerCase()}.user@example.com`)} className="!text-ink">
-              <img src={p.img} alt="" className="size-5 object-contain" /> {p.name}
-            </Button>
-          ))}
+        <div className="space-y-6 font-body text-base leading-8 text-white">
+          <p>
+            While Arqui is a powerful tool for analysing your organisation, it's crucial to remember its limitations. Just like any AI, we learn and grow based on the information you provide. This means that the quality and completeness of your data directly impact the reliability of our insights. Think of it as garbage in, garbage out. Additionally, our AI models, like all models, have inherent biases and limitations. This can lead to unexpected or skewed results, highlighting the importance of critically challenging our output and exploring alternative interpretations.
+          </p>
+          <p>
+            The future is inherently uncertain, and even the most sophisticated simulations can't offer guarantees. Remember, Arqui is here to empower your decision-making, not replace your expertise. We provide you with data-driven scenarios, but it's your knowledge and intuition that ultimately steer your organisation towards success. By refining your data, questioning our results, and leveraging your own experience, you can transform Arqui into a powerful partner in building organisational brilliance, one insightful step at a time.
+          </p>
         </div>
-        <p className="mt-6 text-center text-xs text-muted">Demo only. No server is used, and any valid-looking email works.</p>
       </div>
-    </main>
+    </AuthLayout>
   );
 }

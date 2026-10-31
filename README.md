@@ -4,7 +4,7 @@ ARQUI (ARchitecture QUery and Insight) is a front-end prototype of an organisati
 
 ## What works
 
-- Sign in (email then password, or a provider button) and a two-step onboarding form
+- Sign in (email, or a provider button) with the limitations notice, then "Before we start" onboarding with a simulated AI summary of your role
 - Daily dashboard with three tabs, filters by area, theme and type, and "Add a theme"
 - Current work, Scenario planning and Organisational views, each with insight lists, filtering, sorting and "Start new chat"
 - Insight detail with six tabs: Chat (ask, regenerate, edit a question, export), Chat history, Chat summary (export), Suggested actions, Deliverables (create, open, custom deliverables, upload) and Collaborators (add, remove)
@@ -14,7 +14,7 @@ ARQUI (ARchitecture QUery and Insight) is a front-end prototype of an organisati
 ## Limits
 
 - There is no server. Data is sample data stored in the browser (`localStorage`, key `arqui-state-v1`). Clearing site data resets the app.
-- Sign in is simulated. Any valid-looking email works.
+- Sign in is simulated. Any valid-looking email works, and the role summary is generated from templates.
 - Chat answers are scripted. The Cybersecurity insight has full answers from the design, and other insights get templated answers.
 - The admin and set-up screens from the designs are not rebuilt yet.
 
