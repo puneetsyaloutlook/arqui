@@ -138,7 +138,7 @@ export function Shell() {
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex shrink-0 flex-wrap items-center gap-3 px-4 py-3 lg:px-6">
+        <header className="sticky top-0 z-30 flex shrink-0 flex-wrap bg-canvas items-center gap-3 px-4 py-3 lg:px-6">
           <IconButton label="Open menu" onClick={() => setDrawer(true)} className="lg:hidden">
             <Menu size={22} />
           </IconButton>
