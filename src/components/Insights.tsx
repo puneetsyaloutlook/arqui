@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { ArrowLeft, ListFilter, Plus } from 'lucide-react';
+import { ArrowLeft, ListFilter, Lock, Plus } from 'lucide-react';
 import { THEMES, type Area, type Insight, type Origin } from '../data/seed';
 import { useApp } from '../state/store';
 import { Button, Checkbox, Chip, CollabChip, Modal, TextArea, originLabel } from './ui';
@@ -17,8 +17,17 @@ export function InsightCard({ insight, selected, onSelect }: { insight: Insight;
       >
         <span className={`block text-base leading-6 ${selected ? 'text-teal' : 'text-primary'}`}>{insight.title}</span>
         <span className="mt-3 flex flex-wrap gap-2">
-          <Chip origin={insight.origin}>{originLabel[insight.origin]}</Chip>
-          <Chip>{insight.theme}</Chip>
+          {insight.pinned ? (
+            <>
+              <Chip><Lock size={14} aria-hidden /> Default view</Chip>
+              {insight.theme === 'Digital twin' && <Chip>Digital twin</Chip>}
+            </>
+          ) : (
+            <>
+              <Chip origin={insight.origin}>{originLabel[insight.origin]}</Chip>
+              <Chip>{insight.theme}</Chip>
+            </>
+          )}
           <CollabChip count={insight.collaborators} />
         </span>
       </button>
@@ -50,7 +59,7 @@ export function InsightList({
 
   const allThemes = [...THEMES, ...state.customThemes];
   const shown = useMemo(() => {
-    const list = insights.filter((i) => (themes.length ? themes.includes(i.theme) : true) && (origins.length ? origins.includes(i.origin) : true));
+    const list = insights.filter((i) => !i.pinned).filter((i) => (themes.length ? themes.includes(i.theme) : true) && (origins.length ? origins.includes(i.origin) : true));
     return [...list].sort((a, b) => (sort === 'date' ? b.created.localeCompare(a.created) : a.title.localeCompare(b.title)));
   }, [insights, themes, origins, sort]);
   const active = themes.length + origins.length;
@@ -87,6 +96,10 @@ export function InsightList({
       </div>
       {extraTop}
       <ul className="min-h-0 flex-1 space-y-2.5 overflow-y-auto pb-4">
+        {insights.filter((i) => i.pinned).map((i) => (
+          <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
+        ))}
+        {insights.some((i) => i.pinned) && <li aria-hidden className="my-3 border-t border-line" />}
         {shown.map((i) => (
           <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
         ))}

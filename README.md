@@ -13,7 +13,7 @@ ARQUI (ARchitecture QUery and Insight) is a front-end prototype of an organisati
 
 ## Limits
 
-- There is no server. Data is sample data stored in the browser (`localStorage`, key `arqui-state-v1`). Clearing site data resets the app.
+- There is no server. Data is sample data stored in the browser (`localStorage`, key `arqui-state-v2`). Clearing site data resets the app.
 - Sign in is simulated. Any valid-looking email works, and the role summary is generated from templates.
 - Chat answers are scripted. The Cybersecurity insight has full answers from the design, and other insights get templated answers.
 - The admin and set-up screens from the designs are not rebuilt yet.

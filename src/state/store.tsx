@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { answerFor, deliverablesFor, type Lines } from '../data/chat';
 import { CYBER } from '../data/content';
+import { INNOVATION_QA, QUANTUM, REGULATION_QA } from '../data/content2';
 import { CYBER_ID, SEED_INSIGHTS, type Area, type Insight } from '../data/seed';
 
 export interface Message {
@@ -37,18 +38,27 @@ interface State {
   customThemes: string[];
 }
 
-const KEY = 'arqui-state-v1';
+const KEY = 'arqui-state-v2';
 let uid = 0;
 const newId = () => `${Date.now().toString(36)}-${(uid++).toString(36)}`;
 
 function seedChats(): Record<string, Message[]> {
   const base = Date.now() - 36e5;
-  const msgs: Message[] = [];
-  CYBER.qa.forEach((qa, i) => {
-    msgs.push({ id: `seed-q${i}`, role: 'user', text: qa.q, at: base + i * 6e4 });
-    msgs.push({ id: `seed-a${i}`, role: 'assistant', lines: qa.a, at: base + i * 6e4 + 3e4 });
-  });
-  return { [CYBER_ID]: msgs };
+  const build = (id: string, qa: readonly { q: string; a: readonly string[] }[]) => {
+    const msgs: Message[] = [];
+    qa.forEach((x, i) => {
+      msgs.push({ id: `seed-${id}-q${i}`, role: 'user', text: x.q, at: base + i * 6e4 });
+      msgs.push({ id: `seed-${id}-a${i}`, role: 'assistant', lines: x.a, at: base + i * 6e4 + 3e4 });
+    });
+    return msgs;
+  };
+  const quantum = SEED_INSIGHTS.find((i) => i.id === 'quantum');
+  return {
+    [CYBER_ID]: build(CYBER_ID, CYBER.qa),
+    regulation: build('regulation', REGULATION_QA),
+    innovation: build('innovation', INNOVATION_QA),
+    quantum: quantum ? build('quantum', QUANTUM.questions.map((q) => ({ q, a: answerFor(quantum, q) }))) : [],
+  };
 }
 
 function initial(): State {
@@ -61,6 +71,11 @@ function initial(): State {
     useful: {},
     collabs: {
       [CYBER_ID]: CYBER.collaborators.map((c) => ({ email: c.email, role: 'Collaborator', message: c.message })),
+      landscape: CYBER.collaborators.map((c) => ({ email: c.email, role: 'Collaborator', message: c.message })),
+      innovation: [
+        { email: 'alex.clickworthy@acme.arqui.com.au', role: 'Collaborator', message: '' },
+        { email: 'jordan.phisher@acme.arqui.com.au', role: 'Collaborator', message: '' },
+      ],
     },
     deliverableStatus: { [`${CYBER_ID}|${CYBER.deliverables[0].items[0].title}`]: 'COMPLETE', [`${CYBER_ID}|${CYBER.deliverables[0].items[1].title}`]: 'IN PROGRESS' },
     customDeliverables: {},

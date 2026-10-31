@@ -163,9 +163,20 @@ export function Toast({ message }: { message: string | null }) {
 export function RichText({ lines }: { lines: readonly string[] }) {
   return (
     <div className="space-y-2 text-[15px] leading-6 text-ink">
-      {lines.map((line, i) => {
+      {lines.map((raw, i) => {
+        const bullet = raw.startsWith('• ');
+        const line = bullet ? raw.slice(2) : raw;
         const numbered = /^\d+\.\s/.test(line);
         const isHeading = (numbered && line.length < 120 && !/\.\s.+\./.test(line.replace(/^\d+\.\s/, ''))) || (line.endsWith(':') && line.length < 70);
+        if (bullet) {
+          const b = line.match(/^([^:]{3,60}):\s(.+)$/s);
+          return (
+            <p key={i} className="pl-4 -indent-4 before:mr-2 before:content-['•']">
+              {b ? <strong className="font-medium text-white">{b[1]}: </strong> : null}
+              {b ? b[2] : line}
+            </p>
+          );
+        }
         if (isHeading) return <h4 key={i} className="pt-2 font-medium text-white">{line}</h4>;
         const m = line.match(/^([^:]{3,60}):\s(.+)$/s);
         if (m) {

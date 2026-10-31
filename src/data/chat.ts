@@ -1,4 +1,5 @@
 import { CYBER } from './content';
+import { INNOVATION_QA, QUANTUM, REGULATION_QA } from './content2';
 import { CYBER_ID, type Insight } from './seed';
 
 /** Words that carry no meaning when matching a question to a canned answer. */
@@ -18,7 +19,7 @@ const THEME_STEPS: Record<string, string[]> = {
   'Cost Optimisation': ['Break the spend down by team, service and commitment type.', 'Identify idle or duplicated items that can be retired without risk.', 'Set a monthly review so the savings are kept.'],
   'Talent Management': ['Talk to a small group of people in the affected roles to test what the data suggests.', 'Look for progression and ownership gaps, not only pay.', 'Pilot one change in a single team before rolling it out.'],
   'Strategic Alignment': ['Link this insight to a named strategic objective and its owner.', 'Compare current priorities with what the insight suggests.', 'Bring a short recommendation to the next leadership meeting.'],
-  'Innovation & Agility': ['Map where ideas stall between proposal and funding.', 'Define clear entry criteria and decision dates for each stage.', 'Track a small set of flow measures, such as time in stage.'],
+  'Innovation and Agility': ['Map where ideas stall between proposal and funding.', 'Define clear entry criteria and decision dates for each stage.', 'Track a small set of flow measures, such as time in stage.'],
   'Vendor Management': ['List the vendors involved, their contract dates and current performance.', 'Agree one standard way to track performance and escalate issues.', 'Prepare for the next renewal with data rather than anecdotes.'],
   Adoption: ['Identify which teams already use the shared tools well and why.', 'Remove one barrier for the teams that do not.', 'Share a short success story from an early adopter.'],
 };
@@ -28,10 +29,18 @@ const sentences = (s: string) => s.split(/(?<=[.!?])\s+/).filter(Boolean);
 /** Lines of rich text. See RichText for how headings and list items are recognised. */
 export type Lines = readonly string[];
 
+/** Questions and answers that come from the design, keyed by insight. */
+export const SCRIPTED: Record<string, readonly { q: string; a: readonly string[] }[]> = {
+  [CYBER_ID]: CYBER.qa,
+  regulation: REGULATION_QA,
+  innovation: INNOVATION_QA,
+};
+
 export function answerFor(insight: Insight, question: string): Lines {
-  if (insight.id === CYBER_ID) {
+  const scripted = SCRIPTED[insight.id];
+  if (scripted) {
     let best: { score: number; a: Lines } | null = null;
-    for (const qa of CYBER.qa) {
+    for (const qa of scripted) {
       const score = overlap(question, qa.q);
       if (!best || score > best.score) best = { score, a: qa.a };
     }
@@ -51,7 +60,8 @@ export function answerFor(insight: Insight, question: string): Lines {
 }
 
 export function starterQuestions(insight: Insight): string[] {
-  if (insight.id === CYBER_ID) return [CYBER.qa[0].q, CYBER.qa[3].q, CYBER.qa[4].q];
+  const scripted = SCRIPTED[insight.id];
+  if (scripted && scripted.length >= 3) return [scripted[0].q, scripted[1].q, scripted[2].q];
   return [
     `What is driving "${insight.title.toLowerCase()}"?`,
     'Which teams or processes are most affected?',
@@ -62,6 +72,8 @@ export function starterQuestions(insight: Insight): string[] {
 export interface ActionItem {
   title: string;
   body: string;
+  /** Extra lines shown under the body, in RichText format. */
+  lines?: readonly string[];
 }
 
 export interface DeliverableGroup {
@@ -71,6 +83,7 @@ export interface DeliverableGroup {
 
 export function actionsFor(insight: Insight): ActionItem[] {
   if (insight.id === CYBER_ID) return CYBER.actions.map((a) => ({ title: a.title, body: a.body }));
+  if (insight.id === 'quantum') return QUANTUM.actions.map((a) => ({ title: a.title, body: a.lines[0], lines: a.lines.slice(1).map((l) => (/^[^:]{3,60}:\s/.test(l) ? `• ${l}` : l)) }));
   const steps = THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic Alignment'];
   const titles = ['Validate the evidence', 'Prioritise the biggest gaps', 'Track progress with a simple measure'];
   return titles.map((t, i) => ({ title: `${t} for "${insight.title}"`, body: steps[i] }));
@@ -78,6 +91,7 @@ export function actionsFor(insight: Insight): ActionItem[] {
 
 export function deliverablesFor(insight: Insight): DeliverableGroup[] {
   if (insight.id === CYBER_ID) return CYBER.deliverables.map((g) => ({ action: g.action, items: g.items.map((i) => ({ ...i })) }));
+  if (insight.id === 'quantum') return QUANTUM.deliverables.map((g) => ({ action: g.action, items: g.items.map((i) => ({ ...i })) }));
   return actionsFor(insight).map((a, i) => ({
     action: a.title,
     items: [
@@ -110,4 +124,25 @@ export function reportFor(insight: Insight, title: string): Report {
     disclaimer: 'Disclaimer: This document is based on the data currently available and may not represent the full picture.',
     files: [],
   };
+}
+
+/** Lines for the chat summary tab, in RichText format. */
+export function summaryFor(insight: Insight, questions: string[]): Lines {
+  const bullets = (xs: readonly string[]) => xs.map((x) => `• ${x}`);
+  if (insight.id === CYBER_ID) {
+    const s = CYBER.summary;
+    return ['Observations:', ...bullets(s.observations), 'Summary of responses:', ...bullets(s.responses), 'Urgency:', s.urgency, 'Additional notes:', ...bullets(s.notes)];
+  }
+  if (insight.id === 'quantum') return QUANTUM.summary;
+  const high = insight.impact === 3 || insight.likelihood === 3;
+  return [
+    'Observations:',
+    ...bullets(sentences(insight.summary).slice(0, 3)),
+    'Summary of responses:',
+    ...bullets(questions.length ? questions.map((q) => `You asked: ${q}`) : ['No questions have been asked yet.']),
+    'Urgency:',
+    high ? 'High. This insight has a high impact or is very likely to happen, so it should be reviewed soon.' : 'Medium. Review this insight at your next planning session.',
+    'Additional notes:',
+    ...bullets(['This summary does not constitute an exhaustive analysis and further investigation might be necessary.', 'Regularly review and adapt your approach as new information becomes available.']),
+  ];
 }
