@@ -45,7 +45,7 @@ export function Chip({ origin, children, className }: { origin?: Origin; childre
 export function CollabChip({ count }: { count?: number }) {
   if (!count) return null;
   return (
-    <span className="t-caption inline-flex min-h-6 items-center gap-1 rounded-full border border-line bg-quiet px-2 py-0.5" title={`${count} collaborator${count > 1 ? 's' : ''}`}>
+    <span className="t-caption inline-flex min-h-6 items-center gap-1 rounded-full border border-line bg-page px-2 py-0.5" title={`${count} collaborator${count > 1 ? 's' : ''}`}>
       <UsersRound size={16} aria-hidden />
       <span className="sr-only">{count} collaborators</span>
     </span>

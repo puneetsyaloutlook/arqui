@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BadgeCheck, Bookmark, Bot, Download, Pencil, RefreshCw, Send, Share2, Trash2, Upload } from 'lucide-react';
+import { BadgeCheck, Bookmark, Bot, User, Download, Pencil, RefreshCw, Send, Share2, Trash2, Upload } from 'lucide-react';
 import { SCRIPTED, actionsFor, deliverablesFor, reportFor, summaryFor, starterQuestions } from '../data/chat';
 import { AREA_LABEL, type Insight } from '../data/seed';
 import { useApp, type Message } from '../state/store';
@@ -58,6 +58,7 @@ function MessageView({ m, insight, onEdit, onRegenerate, onSources, onTwin }: { 
   if (m.role === 'user') {
     return (
       <div id={`msg-${m.id}`} className="w-full">
+        <span className="t-eyebrow mb-1 flex items-center gap-2"><User size={16} aria-hidden /> You</span>
         <p className="w-full rounded-ctl border border-line bg-quiet px-4 py-3 text-base">{m.text}</p>
         <button type="button" onClick={onEdit} className="mt-1 inline-flex min-h-8 items-center gap-1 text-sm text-action hover:underline hover:underline-offset-[3px]">
           <Pencil size={16} aria-hidden /> Edit question
@@ -451,18 +452,18 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
     setTab(TABS[next]);
     tabRefs.current[next]?.focus();
   };
-  const chipOrigin = insight.pinned ? null : <Chip origin={insight.origin}>{originLabel[insight.origin]}</Chip>;
+  const chipOrigin = insight.pinned ? null : <Chip origin={insight.origin} className="!bg-page">{originLabel[insight.origin]}</Chip>;
 
   return (
     <article aria-label={insight.title} className={`flex flex-col ${className}`}>
-      <div className="grid shrink-0 grid-cols-[minmax(0,1fr)] gap-4 pb-3 md:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="mb-2 grid shrink-0 grid-cols-[minmax(0,1fr)] gap-4 rounded-card bg-quiet p-5 md:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0 space-y-2">
           <h2 className="t-h2">{insight.title}</h2>
           <p className="text-base text-fg-3">{insight.summary}</p>
           <div className="flex flex-wrap gap-2 pt-1">
-            {insight.pinned === 'landscape' ? <Chip origin="self">{originLabel.self}</Chip> : chipOrigin}
-            {!insight.pinned || insight.pinned === 'landscape' ? <Chip>{insight.theme}</Chip> : null}
-            {!insight.pinned && <Chip>{AREA_LABEL[insight.area]}</Chip>}
+            {insight.pinned === 'landscape' ? <Chip origin="self" className="!bg-page">{originLabel.self}</Chip> : chipOrigin}
+            {!insight.pinned || insight.pinned === 'landscape' ? <Chip className="!bg-page">{insight.theme}</Chip> : null}
+            {!insight.pinned && <Chip className="!bg-page">{AREA_LABEL[insight.area]}</Chip>}
             <CollabChip count={collabCount} />
           </div>
         </div>
