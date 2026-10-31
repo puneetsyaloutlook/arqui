@@ -102,6 +102,51 @@ export function AnalysisPanel() {
 
 /* ---------- Digital twin ---------- */
 
+const CORE_COLOURS = ['#6a0a52', '#42283a', '#3a2030', '#55164a'];
+const EXT_COLOURS = ['#bfa874', '#bb9238', '#b87a08', '#a06e5e', '#944a38', '#8b3a22'];
+
+function arc(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number) {
+  const pt = (r: number, a: number) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
+  const [x0, y0] = pt(r1, a0), [x1, y1] = pt(r1, a1), [x2, y2] = pt(r0, a1), [x3, y3] = pt(r0, a0);
+  const large = a1 - a0 > 180 ? 1 : 0;
+  return `M${x0} ${y0} A${r1} ${r1} 0 ${large} 1 ${x1} ${y1} L${x2} ${y2} A${r0} ${r0} 0 ${large} 0 ${x3} ${y3} Z`;
+}
+
+/** Ring chart of the perspectives: core perspectives inside, extended perspectives outside. */
+function PerspectiveRing({ name, onSelect }: { name: string; onSelect: (n: string) => void }) {
+  const core = PERSPECTIVES.filter((p) => p.core);
+  const ext = PERSPECTIVES.filter((p) => !p.core);
+  const seg = (p: (typeof PERSPECTIVES)[number], i: number, n: number, r0: number, r1: number, start: number, colour: string) => {
+    const step = 360 / n;
+    const selected = p.name === name;
+    return (
+      <path
+        key={p.name}
+        d={arc(120, 120, r0, r1, start + i * step, start + (i + 1) * step)}
+        fill={colour}
+        stroke={selected ? '#d0bcff' : '#202125'}
+        strokeWidth={selected ? 4 : 3}
+        className="cursor-pointer transition-opacity hover:opacity-80"
+        role="button"
+        tabIndex={0}
+        aria-label={`${p.name}${selected ? ' (selected)' : ''}`}
+        aria-pressed={selected}
+        onClick={() => onSelect(p.name)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(p.name)}
+      >
+        <title>{p.name}</title>
+      </path>
+    );
+  };
+  return (
+    <svg viewBox="0 0 240 240" className="size-64 shrink-0 sm:size-72" role="group" aria-label="Perspectives of the digital twin">
+      {ext.map((p, i) => seg(p, i, ext.length, 66, 118, -60, EXT_COLOURS[i]))}
+      {core.map((p, i) => seg(p, i, core.length, 0, 62, -135, CORE_COLOURS[i]))}
+    </svg>
+  );
+}
+
+
 function Confidence({ value }: { value: number }) {
   return (
     <div className="w-40 shrink-0">
@@ -174,7 +219,10 @@ export function TwinPanel() {
   return (
     <div className="py-5">
       <h3 className="mb-4 text-[22px] text-white">Summary of digital twin</h3>
-      <p className="max-w-3xl font-body text-base leading-8 text-white">{TWIN_SUMMARY}</p>
+      <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+        <PerspectiveRing name={name} onSelect={setName} />
+        <p className="max-w-xl font-body text-base leading-8 text-white">{TWIN_SUMMARY}</p>
+      </div>
       <div className="mt-10 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         <nav aria-label="Perspectives"><List core /><List core={false} /></nav>
         <div className="rounded-2xl bg-rail p-6">
