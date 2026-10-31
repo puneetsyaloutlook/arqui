@@ -22,9 +22,9 @@ export default function Onboarding() {
   const saveAbout = (e: React.FormEvent) => {
     e.preventDefault();
     const err: Record<string, string> = {};
-    if (!p.name.trim()) err.name = 'Enter your name.';
-    if (!p.department) err.department = 'Choose your department or group.';
-    if (!p.jobTitle) err.jobTitle = 'Choose your job title.';
+    if (!p.name.trim()) err.name = 'Your name is missing. Enter your full name.';
+    if (!p.department) err.department = 'Your department is missing. Choose one from the list.';
+    if (!p.jobTitle) err.jobTitle = 'Your job title is missing. Choose one from the list.';
     setErrors(err);
     if (Object.keys(err).length) return;
     saveProfile(p);
@@ -44,47 +44,41 @@ export default function Onboarding() {
   return (
     <AuthLayout title="Before we start">
       {step === 'about' ? (
-        <form onSubmit={saveAbout} noValidate className="mt-8 font-body">
-          <p className="text-base text-white">To provide the most relevant insights, we'll need some information about you and your role at Acme:</p>
+        <form onSubmit={saveAbout} noValidate className="mt-6">
+          <p className="max-w-[62ch] text-base text-fg-3">To provide the most relevant insights, we'll need some information about you and your role at Acme:</p>
           <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,350px)_minmax(0,1fr)] lg:gap-16">
             <div className="space-y-4">
-              <h2 className="text-[28px] text-white">About you</h2>
+              <h2 className="t-h2">About you</h2>
               <TextField label="Your name" autoComplete="name" autoFocus value={p.name} error={errors.name} onChange={(e) => set({ name: e.target.value })} />
-              <div>
-                <Select label="Your department/group" options={DEPARTMENTS} value={p.department} onChange={(e) => set({ department: e.target.value })} />
-                {errors.department && <p role="alert" className="mt-1 px-4 text-xs text-[#f2b8b5]">{errors.department}</p>}
-              </div>
-              <div>
-                <Select label="Your job title" options={JOB_TITLES} value={p.jobTitle} onChange={(e) => set({ jobTitle: e.target.value })} />
-                {errors.jobTitle && <p role="alert" className="mt-1 px-4 text-xs text-[#f2b8b5]">{errors.jobTitle}</p>}
-              </div>
-              <Button variant="filled" type="submit">Save</Button>
+              <Select label="Your department or group" options={DEPARTMENTS} value={p.department} error={errors.department} onChange={(e) => set({ department: e.target.value })} />
+              <Select label="Your job title" options={JOB_TITLES} value={p.jobTitle} error={errors.jobTitle} onChange={(e) => set({ jobTitle: e.target.value })} />
+              <Button variant="primary" type="submit">Save about you</Button>
             </div>
             <fieldset>
-              <legend className="mb-4 text-[28px] text-white">Areas of interest</legend>
-              <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
-                {INTERESTS.map((t) => <Checkbox key={t} label={t} checked={p.interests.includes(t)} onChange={() => toggle(t)} className="!text-white" />)}
+              <legend className="t-h2 mb-4">Areas of interest</legend>
+              <div className="grid gap-x-6 sm:grid-cols-2">
+                {INTERESTS.map((t) => <Checkbox key={t} label={t} checked={p.interests.includes(t)} onChange={() => toggle(t)} />)}
               </div>
             </fieldset>
           </div>
         </form>
       ) : (
-        <form onSubmit={saveRole} className="mt-8 font-body">
-          <h2 className="text-[28px] text-white">Your role</h2>
-          <p className="mt-4 max-w-[58rem] text-base leading-7 text-white">
+        <form onSubmit={saveRole} className="mt-6">
+          <h2 className="t-h2">Your role</h2>
+          <p className="mt-3 max-w-[62ch] text-base text-fg-3">
             Based on the information you entered, this is what Arqui understands about your role. Is this understanding of your role accurate? Please edit or provide further details about your specific responsibilities and areas of focus within the {p.jobTitle} role at Acme.
           </p>
           {thinking ? (
-            <div role="status" className="mt-6 flex h-72 items-center justify-center rounded-lg bg-[#222] text-base text-muted">Arqui is working out what your role involves...</div>
+            <div role="status" className="mt-6 flex h-72 items-center justify-center rounded-card border border-dashed border-control bg-quiet text-base text-fg-2">Arqui is working out what your role involves.</div>
           ) : (
             <>
-              <label htmlFor="role-desc" className="sr-only">Role description</label>
-              <textarea id="role-desc" value={desc} onChange={(e) => setDesc(e.target.value)} rows={12} className="mt-6 w-full resize-y rounded-lg bg-[#222] p-3 text-[15px] leading-6 text-white outline-none focus:ring-2 focus:ring-primary" />
+              <label htmlFor="role-desc" className="t-label mb-1 mt-6 block">Role description</label>
+              <textarea id="role-desc" value={desc} onChange={(e) => setDesc(e.target.value)} rows={12} className="w-full resize-y rounded-ctl border border-control bg-page p-3 text-base text-fg hover:border-fg-2 focus:border-action focus:shadow-[0_0_0_1px_var(--action)] focus:outline-none" />
             </>
           )}
           <div className="mt-6 flex gap-2">
-            <Button variant="text" onClick={() => setStep('about')} disabled={thinking}>Back</Button>
-            <Button variant="filled" type="submit" disabled={thinking || !desc.trim()}>Save</Button>
+            <Button variant="tertiary" onClick={() => setStep('about')} disabled={thinking}>Back</Button>
+            <Button variant="primary" type="submit" disabled={thinking || !desc.trim()}>Save role</Button>
           </div>
         </form>
       )}

@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { CircleHelp, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Search, UserCircle, Video, X } from 'lucide-react';
+import { CircleHelp, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Sun, UserCircle, Video, X } from 'lucide-react';
 import calendar from '../assets/ui/dashboard.png';
 import toolbox from '../assets/ui/current-work.png';
 import binoculars from '../assets/ui/scenario.png';
 import cube from '../assets/ui/org-views.png';
 import { AREA_PATH, type Insight } from '../data/seed';
 import { useApp } from '../state/store';
+import { useTheme } from '../state/theme';
 import { Button, IconButton, Modal, TextArea, TextField, Toast } from './ui';
 
 const NAV = [
@@ -24,33 +25,38 @@ const TITLES: Record<string, string> = {
 };
 
 export function Logo({ className = '' }: { className?: string }) {
-  return <span className={`font-logo text-[40px] leading-none tracking-wide text-[#b4b4b4] ${className}`}>ARQUI</span>;
+  return <span className={`t-logo ${className}`}>ARQUI</span>;
+}
+
+/** A spot icon drawn in the colour of the text beside it. */
+function SpotIcon({ src, className = '' }: { src: string; className?: string }) {
+  return <span aria-hidden className={`inline-block shrink-0 bg-current ${className}`} style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})`, WebkitMaskSize: 'contain', maskSize: 'contain', WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat', WebkitMaskPosition: 'left center', maskPosition: 'left center' }} />;
 }
 
 function Sidebar({ collapsed, onToggle, onNavigate }: { collapsed: boolean; onToggle: () => void; onNavigate: () => void }) {
   return (
-    <nav aria-label="Main" className="flex h-full flex-col bg-rail">
-      <div className="flex h-[88px] shrink-0 items-center justify-between gap-2 px-5">
-        {!collapsed && <Logo />}
-        <IconButton label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={onToggle} className="hidden border border-chip lg:inline-flex">
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+    <nav aria-label="Main" className="flex h-full flex-col bg-nav text-neutral-100">
+      <div className={`flex min-h-16 shrink-0 items-center gap-2 px-4 ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        {!collapsed && <Logo className="text-inverse" />}
+        <IconButton label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={onToggle} className="hidden text-neutral-100 hover:!bg-white/10 lg:inline-flex">
+          {collapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
         </IconButton>
-        <IconButton label="Close menu" onClick={onNavigate} className="lg:hidden">
+        <IconButton label="Close menu" onClick={onNavigate} className="text-neutral-100 hover:!bg-white/10 lg:hidden">
           <X size={20} />
         </IconButton>
       </div>
-      <ul className="flex-1 space-y-2 overflow-y-auto px-3 pb-6">
-        {NAV.map((n) => (
-          <li key={n.to}>
+      <ul className="flex-1 overflow-y-auto pb-6">
+        {NAV.map((n, i) => (
+          <li key={n.to} className={i === 1 ? 'mt-2 border-t border-white/15 pt-2' : ''}>
             <NavLink
               to={n.to}
               onClick={onNavigate}
               title={collapsed ? n.title : undefined}
-              className={({ isActive }) => `flex flex-col gap-2 rounded-3xl p-4 transition-colors hover:bg-white/5 ${isActive ? 'bg-panel-hi text-teal' : 'text-white'} ${collapsed ? 'items-center' : ''}`}
+              className={({ isActive }) => `flex flex-col gap-2 border-s-[3px] px-4 py-3 text-neutral-100 transition-colors hover:bg-white/5 active:bg-white/15 focus-visible:!outline-neutral-100 ${isActive ? 'border-brand bg-white/10 font-semibold' : 'border-transparent'} ${collapsed ? 'items-center' : ''}`}
             >
-              <img src={n.img} alt="" className={collapsed ? 'h-10 w-10 object-contain' : 'h-[52px] w-[52px] object-contain object-left'} />
-              {!collapsed && <span className="text-lg font-medium">{n.title}</span>}
-              {!collapsed && n.text && <span className="text-xs leading-[15px] text-muted">{n.text}</span>}
+              <SpotIcon src={n.img} className="size-9" />
+              {!collapsed && <span className="text-base leading-tight">{n.title}</span>}
+              {!collapsed && n.text && <span className="t-caption !text-neutral-100">{n.text}</span>}
             </NavLink>
           </li>
         ))}
@@ -82,25 +88,25 @@ function SearchBox() {
   };
   return (
     <div ref={box} className="relative min-w-0 flex-1">
-      <form role="search" onSubmit={(e) => { e.preventDefault(); if (results[0]) go(results[0]); }} className="flex h-14 items-center gap-3 rounded-full bg-panel-hi px-5">
-        <Search size={20} className="shrink-0 text-ink" aria-hidden />
+      <form role="search" onSubmit={(e) => { e.preventDefault(); if (results[0]) go(results[0]); }} className="flex min-h-11 items-center gap-3 rounded-ctl border border-control bg-page px-3 focus-within:border-action focus-within:shadow-[0_0_0_1px_var(--action)]">
+        <Search size={20} className="shrink-0 text-fg-2" aria-hidden />
         <input
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           aria-label="Search insights"
-          placeholder="What's on your mind?"
-          className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink/80"
+          placeholder="Search insights"
+          className="min-w-0 flex-1 bg-transparent py-2 text-base text-fg outline-none placeholder:text-fg-2"
         />
       </form>
       {open && q.trim().length >= 2 && (
-        <ul className="absolute inset-x-0 top-full z-30 mt-2 max-h-80 overflow-y-auto rounded-2xl bg-panel p-2 shadow-xl">
-          {results.length === 0 && <li className="px-4 py-3 text-sm text-muted">No insights match "{q}".</li>}
+        <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-ctl border border-line-strong bg-overlay p-1 shadow-elevated">
+          {results.length === 0 && <li className="t-small px-3 py-3 text-fg-2">No insights match "{q}". Try fewer or different words.</li>}
           {results.map((i) => (
             <li key={i.id}>
-              <button type="button" onClick={() => go(i)} className="w-full rounded-xl px-4 py-2.5 text-left hover:bg-white/10">
-                <span className="block text-sm text-primary">{i.title}</span>
-                <span className="block text-xs text-muted">{TITLES[AREA_PATH[i.area]]}</span>
+              <button type="button" onClick={() => go(i)} className="w-full rounded px-3 py-2 text-left hover:bg-quiet active:bg-action-soft">
+                <span className="t-small block text-fg">{i.title}</span>
+                <span className="t-caption block">{TITLES[AREA_PATH[i.area]]}</span>
               </button>
             </li>
           ))}
@@ -124,44 +130,46 @@ export function Shell() {
     document.title = `${title} | Arqui`;
   }, [title]);
 
+  const { dark, toggle } = useTheme();
   return (
-    <div className="flex min-h-dvh bg-canvas">
-      <aside className={`sticky top-0 hidden h-dvh shrink-0 self-start transition-[width] lg:block ${collapsed ? 'w-[96px]' : 'w-[260px]'}`}>
+    <div className="flex min-h-dvh bg-page">
+      <aside className={`sticky top-0 hidden h-dvh shrink-0 self-start transition-[width] lg:block ${collapsed ? 'w-16' : 'w-60'}`}>
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} onNavigate={() => undefined} />
       </aside>
       {drawer && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setDrawer(false)} />
-          <aside className="absolute inset-y-0 left-0 w-[290px] max-w-[85vw]">
+        <div className="fixed inset-0 z-30 lg:hidden">
+          <div className="absolute inset-0 bg-scrim" onClick={() => setDrawer(false)} />
+          <aside className="absolute inset-y-0 left-0 z-40 w-60 max-w-[85vw]">
             <Sidebar collapsed={false} onToggle={() => undefined} onNavigate={() => setDrawer(false)} />
           </aside>
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex shrink-0 flex-wrap bg-canvas items-center gap-3 px-4 py-3 lg:px-6">
-          <IconButton label="Open menu" onClick={() => setDrawer(true)} className="lg:hidden">
-            <Menu size={22} />
-          </IconButton>
-          <h1 className="mr-2 text-2xl leading-9 text-pink lg:min-w-[220px] lg:text-[28px]">{title}</h1>
-          <div className="order-last flex w-full lg:order-none lg:w-auto lg:flex-1">
-            <SearchBox />
-          </div>
-          <div className="ml-auto flex items-center gap-2 lg:ml-0">
-            <Button onClick={() => setDialog('invite')} className="!hidden sm:!inline-flex !h-11 !text-ink">
-              <Video size={18} aria-hidden /> Invite to meeting
-            </Button>
-            <Button onClick={() => setDialog('help')} className="!hidden sm:!inline-flex !h-11 !text-ink">
-              <CircleHelp size={18} aria-hidden /> Get help
-            </Button>
-            <IconButton label="Account" onClick={() => setDialog('account')} className="text-primary">
-              <UserCircle size={30} />
+        <header className="sticky top-0 z-[25] border-b border-line bg-page">
+          <div className="mx-auto flex min-h-16 w-full max-w-[1180px] flex-wrap items-center gap-x-4 gap-y-2 px-6 py-2">
+            <IconButton label="Open menu" onClick={() => setDrawer(true)} className="lg:hidden">
+              <Menu size={24} />
             </IconButton>
-            <IconButton label="Sign out" onClick={() => { signOut(); navigate('/signin'); }} className="text-primary">
-              <LogOut size={26} />
-            </IconButton>
+            <h1 className="t-h1 mr-2 whitespace-nowrap">{title}</h1>
+            <div className="order-last flex w-full lg:order-none lg:w-auto lg:min-w-[220px] lg:flex-1">
+              <SearchBox />
+            </div>
+            <div className="ml-auto flex items-center gap-1 lg:ml-0">
+              <Button onClick={() => setDialog('invite')} className="!hidden xl:!inline-flex">
+                <Video size={20} aria-hidden /> Invite to meeting
+              </Button>
+              <Button onClick={() => setDialog('help')} className="!hidden xl:!inline-flex">
+                <CircleHelp size={20} aria-hidden /> Get help
+              </Button>
+              <IconButton label="Invite to meeting" onClick={() => setDialog('invite')} className="xl:hidden"><Video size={20} /></IconButton>
+              <IconButton label="Get help" onClick={() => setDialog('help')} className="xl:hidden"><CircleHelp size={20} /></IconButton>
+              <IconButton label={dark ? 'Switch to light theme' : 'Switch to dark theme'} onClick={toggle}>{dark ? <Sun size={20} /> : <Moon size={20} />}</IconButton>
+              <IconButton label="Account" onClick={() => setDialog('account')}><UserCircle size={24} /></IconButton>
+              <IconButton label="Sign out" onClick={() => { signOut(); navigate('/signin'); }}><LogOut size={20} /></IconButton>
+            </div>
           </div>
         </header>
-        <main className="flex-1">
+        <main className="mx-auto w-full max-w-[1180px] flex-1 px-6">
           <Outlet />
         </main>
       </div>
@@ -177,40 +185,40 @@ export function Shell() {
               setInv({ email: '', topic: '', when: '' });
             }}
           >
-            <p className="text-sm text-muted">Arqui joins the meeting, takes notes and suggests actions afterwards.</p>
+            <p className="t-small text-fg-2">Arqui joins the meeting, takes notes and suggests actions afterwards.</p>
             <TextField label="Attendee email" type="email" required value={inv.email} onChange={(e) => setInv({ ...inv, email: e.target.value })} />
             <TextField label="Topic" required value={inv.topic} onChange={(e) => setInv({ ...inv, topic: e.target.value })} />
             <TextField label="Date and time" type="datetime-local" value={inv.when} onChange={(e) => setInv({ ...inv, when: e.target.value })} />
             <div className="flex justify-end gap-2">
-              <Button variant="text" onClick={() => setDialog(null)}>Cancel</Button>
-              <Button variant="filled" type="submit">Send invitation</Button>
+              <Button variant="tertiary" onClick={() => setDialog(null)}>Cancel</Button>
+              <Button variant="primary" type="submit">Send invitation</Button>
             </div>
           </form>
         </Modal>
       )}
       {dialog === 'help' && (
         <Modal title="Get help" onClose={() => setDialog(null)}>
-          <div className="space-y-3 text-sm leading-6 text-ink">
+          <div className="space-y-3 text-base">
             <p>Ask Arqui a question in the search bar, or open an insight and use the Chat tab.</p>
-            <ul className="list-disc space-y-1 pl-5 text-muted">
+            <ul className="list-disc space-y-1 pl-6 text-fg-3">
               <li>Open an insight to see its chat, summary, suggested actions and deliverables.</li>
               <li>Tell Arqui whether an insight is useful so that future insights improve.</li>
               <li>Invite colleagues from the Collaborators tab.</li>
             </ul>
-            <p className="text-muted">Still stuck? Email support@arqui.example.</p>
+            <p className="text-fg-2">Still stuck? Email support@arqui.example.</p>
           </div>
         </Modal>
       )}
       {dialog === 'account' && (
         <Modal title="Your account" onClose={() => setDialog(null)}>
-          <dl className="space-y-2 text-sm">
-            <div><dt className="text-muted">Name</dt><dd className="text-white">{state.profile.name || 'Not set'}</dd></div>
-            <div><dt className="text-muted">Email</dt><dd className="text-white">{state.email}</dd></div>
-            <div><dt className="text-muted">Job title</dt><dd className="text-white">{state.profile.jobTitle || 'Not set'}</dd></div>
+          <dl className="space-y-3 text-base">
+            <div><dt className="t-label">Name</dt><dd>{state.profile.name || 'Not set'}</dd></div>
+            <div><dt className="t-label">Email</dt><dd>{state.email}</dd></div>
+            <div><dt className="t-label">Job title</dt><dd>{state.profile.jobTitle || 'Not set'}</dd></div>
           </dl>
           <div className="mt-6 flex justify-end gap-2">
-            <Button variant="text" onClick={() => setDialog(null)}>Close</Button>
-            <Button variant="filled" onClick={() => { setDialog(null); navigate('/onboarding'); }}>Edit profile</Button>
+            <Button variant="tertiary" onClick={() => setDialog(null)}>Close</Button>
+            <Button variant="primary" onClick={() => { setDialog(null); navigate('/onboarding'); }}>Edit profile</Button>
           </div>
         </Modal>
       )}

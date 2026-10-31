@@ -32,18 +32,18 @@ export function MasterDetail({ area, extraTop, empty }: { area: Area; extraTop?:
   const select = (next: string | null) => setParams(next ? { id: next } : {}, { replace: false });
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-4 lg:grid-cols-[minmax(320px,427px)_minmax(0,1fr)] lg:px-6">
-      <div className={`${selected && !desktop ? 'hidden' : 'flex'} flex-col lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)] lg:self-start`}>
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 py-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+      <div className={`${selected && !desktop ? 'hidden' : 'flex'} flex-col lg:sticky lg:top-16 lg:-my-4 lg:h-[calc(100dvh-4rem)] lg:self-start lg:py-4`}>
         <InsightList area={area} insights={insights} selectedId={selected?.id ?? null} onSelect={select} extraTop={extraTop} className="lg:h-full" />
       </div>
-      <div className={`${selected ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col`}>
+      <div className={`${selected ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col lg:border-s lg:border-line lg:ps-6`}>
         {selected ? (
           <>
             <BackToList onClick={() => select(null)} />
             <InsightDetail key={selected.id} insight={selected} className="flex-1" />
           </>
         ) : (
-          (empty ?? <p className="m-auto max-w-sm text-center text-muted">Select an insight to read the analysis, ask questions and plan next steps.</p>)
+          (empty ?? <p className="m-auto max-w-sm text-center text-fg-2">Select an insight to read the analysis, ask questions and plan next steps.</p>)
         )}
       </div>
     </div>

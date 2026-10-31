@@ -225,7 +225,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           summary: `Started from a question: "${q}"`,
           area,
           origin: 'user',
-          theme: 'Strategic Alignment',
+          theme: 'Strategic alignment',
           created: new Date().toISOString().slice(0, 10),
           ...(area === 'scenario' ? { horizon: 'Medium term' as const, impact: 2 as const, likelihood: 2 as const } : {}),
         };

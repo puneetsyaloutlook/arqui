@@ -1,17 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AREA_PATH, type Horizon, type Insight } from '../data/seed';
-import { CAPABILITY_DATA, MEASURES, PERSPECTIVES, PROJECT_BANDS, QUALITY, SCALE, TWIN_SUMMARY, type CapabilityData, type Measure } from '../data/twin';
 import { X } from 'lucide-react';
+import { AREA_PATH, type Horizon, type Insight } from '../data/seed';
+import { CAPABILITY_DATA, MEASURES, PERSPECTIVES, PROJECT_BANDS, QUALITY, TWIN_SUMMARY, type CapabilityData, type Measure } from '../data/twin';
 import { useApp } from '../state/store';
+import { Button, IconButton } from './ui';
 
 /* ---------- Insight landscape ---------- */
 
 const HORIZONS: Horizon[] = ['Long term', 'Medium term', 'Short term'];
-// Colour is likelihood. Size is impact.
-const LIKE = { 1: { label: 'Low likelihood', colour: '#00c2a7' }, 2: { label: 'Medium likelihood', colour: '#ffbb33' }, 3: { label: 'High likelihood', colour: '#ff693e' } } as const;
-const SIZE = { 1: 26, 2: 44, 3: 62 } as const;
+// Fill is likelihood (a light to dark teal ramp) and size is impact.
+const LIKE = {
+  1: { label: 'Low likelihood', fill: 'var(--teal-200)' },
+  2: { label: 'Medium likelihood', fill: 'var(--primary)' },
+  3: { label: 'High likelihood', fill: 'var(--teal-900)' },
+} as const;
+const SIZE = { 1: 24, 2: 40, 3: 56 } as const;
 const IMPACT = { 1: 'Low impact', 2: 'Medium impact', 3: 'High impact' } as const;
+const dot = (k: 1 | 2 | 3, size: number) => ({ width: size, height: size, background: LIKE[k].fill, border: '1.5px solid var(--chart-ink)' });
 
 export function LandscapePanel({ onOpen }: { onOpen?: () => void }) {
   void onOpen;
@@ -21,50 +27,46 @@ export function LandscapePanel({ onOpen }: { onOpen?: () => void }) {
   const open = (i: Insight) => navigate(`${AREA_PATH.scenario}?id=${i.id}`);
   return (
     <div className="py-5">
-      <h3 className="mb-4 text-[22px] text-white">Insights landscape</h3>
-      <div className="border-t border-pink">
+      <h3 className="t-h2 mb-4">Insights landscape</h3>
+      <div className="border-t border-line">
         {HORIZONS.map((h) => {
           const row = items.filter((i) => i.horizon === h).sort((a, b) => a.theme.localeCompare(b.theme));
           return (
-            <div key={h} className="grid min-h-[120px] grid-cols-[88px_minmax(0,1fr)] items-center gap-2 border-b border-pink py-3 sm:grid-cols-[150px_minmax(0,1fr)]">
-              <p className="text-sm uppercase tracking-wide text-white">{h.replace(' ', '\n')}</p>
-              <ul className="flex flex-wrap items-center gap-x-6 gap-y-3">
-                {row.map((i) => {
-                  const c = LIKE[i.likelihood ?? 2].colour;
-                  const s = SIZE[i.impact ?? 2];
-                  return (
-                    <li key={i.id}>
-                      <button
-                        type="button"
-                        onClick={() => open(i)}
-                        title={`${i.title}: ${IMPACT[i.impact ?? 2]}, ${LIKE[i.likelihood ?? 2].label.toLowerCase()}`}
-                        aria-label={`${i.title}. ${IMPACT[i.impact ?? 2]}, ${LIKE[i.likelihood ?? 2].label.toLowerCase()}`}
-                        className="block rounded-full border-2 transition-transform hover:scale-110 focus-visible:scale-110"
-                        style={{ width: s, height: s, borderColor: c, background: `${c}33` }}
-                      />
-                    </li>
-                  );
-                })}
+            <div key={h} className="grid min-h-[112px] grid-cols-[96px_minmax(0,1fr)] items-center gap-3 border-b border-line py-3 sm:grid-cols-[136px_minmax(0,1fr)]">
+              <p className="t-eyebrow">{h}</p>
+              <ul className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                {row.map((i) => (
+                  <li key={i.id}>
+                    <button
+                      type="button"
+                      onClick={() => open(i)}
+                      title={`${i.title}: ${IMPACT[i.impact ?? 2]}, ${LIKE[i.likelihood ?? 2].label.toLowerCase()}`}
+                      aria-label={`${i.title}. ${IMPACT[i.impact ?? 2]}, ${LIKE[i.likelihood ?? 2].label.toLowerCase()}`}
+                      className="block rounded-full transition-transform hover:scale-110 focus-visible:scale-110"
+                      style={dot(i.likelihood ?? 2, SIZE[i.impact ?? 2])}
+                    />
+                  </li>
+                ))}
               </ul>
             </div>
           );
         })}
       </div>
-      <div className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-4 text-sm text-white">
+      <ul className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-4 text-sm" aria-label="Key">
         {([1, 2, 3] as const).map((k) => (
-          <div key={k} className="flex flex-col items-center gap-2">
-            <span className="rounded-full border border-ink" style={{ width: SIZE[k], height: SIZE[k] }} aria-hidden />
+          <li key={`i${k}`} className="flex flex-col items-center gap-2">
+            <span className="rounded-full border border-fg-2" style={{ width: SIZE[k], height: SIZE[k] }} aria-hidden />
             {IMPACT[k]}
-          </div>
+          </li>
         ))}
         {([1, 2, 3] as const).map((k) => (
-          <div key={k} className="flex flex-col items-center gap-2">
-            <span className="size-11 rounded-full border-2" style={{ borderColor: LIKE[k].colour, background: `${LIKE[k].colour}33` }} aria-hidden />
+          <li key={`l${k}`} className="flex flex-col items-center gap-2">
+            <span className="rounded-full" style={dot(k, 32)} aria-hidden />
             {LIKE[k].label}
-          </div>
+          </li>
         ))}
-      </div>
-      <p className="mt-4 text-xs text-muted">Select a circle to open that insight.</p>
+      </ul>
+      <p className="t-caption mt-4">Select a circle to open that insight.</p>
     </div>
   );
 }
@@ -76,22 +78,22 @@ export function AnalysisPanel() {
   const items = state.insights
     .filter((i) => i.area === 'scenario' && i.horizon)
     .sort((a, b) => (b.impact ?? 0) * (b.likelihood ?? 0) - (a.impact ?? 0) * (a.likelihood ?? 0));
+  const th = 'whitespace-nowrap border-b-2 border-line px-4 py-3 text-start font-semibold text-fg-2';
+  const td = 'border-b border-line px-4 py-3 align-top';
   return (
     <div className="py-5">
-      <h3 className="text-lg font-medium text-white">Insight analysis</h3>
-      <p className="mb-4 text-sm text-muted">Scenarios ranked by impact multiplied by likelihood.</p>
-      <div className="overflow-x-auto rounded-xl bg-rail">
-        <table className="w-full min-w-[560px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-wide text-muted">
-            <tr><th className="p-3">Scenario</th><th className="p-3">Time horizon</th><th className="p-3">Impact</th><th className="p-3">Likelihood</th></tr>
-          </thead>
+      <h3 className="t-h3">Insight analysis</h3>
+      <p className="t-small mb-4 text-fg-2">Scenarios ranked by impact multiplied by likelihood.</p>
+      <div className="overflow-x-auto">
+        <table className="t-small w-full min-w-[560px]">
+          <thead><tr><th scope="col" className={th}>Scenario</th><th scope="col" className={th}>Time horizon</th><th scope="col" className={th}>Impact</th><th scope="col" className={th}>Likelihood</th></tr></thead>
           <tbody>
             {items.map((i) => (
-              <tr key={i.id} className="border-t border-line">
-                <td className="p-3"><button type="button" className="text-left text-primary hover:underline" onClick={() => navigate(`${AREA_PATH.scenario}?id=${i.id}`)}>{i.title}</button></td>
-                <td className="p-3 text-ink">{i.horizon}</td>
-                <td className="p-3 text-ink">{IMPACT[i.impact ?? 2].replace(' impact', '')}</td>
-                <td className="p-3 text-ink">{LIKE[i.likelihood ?? 2].label.replace(' likelihood', '')}</td>
+              <tr key={i.id} className="hover:bg-quiet">
+                <th scope="row" className={`${td} text-start font-normal`}><button type="button" className="text-start text-action hover:underline hover:underline-offset-[3px]" onClick={() => navigate(`${AREA_PATH.scenario}?id=${i.id}`)}>{i.title}</button></th>
+                <td className={td}>{i.horizon}</td>
+                <td className={td}>{IMPACT[i.impact ?? 2].replace(' impact', '')}</td>
+                <td className={td}>{LIKE[i.likelihood ?? 2].label.replace(' likelihood', '')}</td>
               </tr>
             ))}
           </tbody>
@@ -103,8 +105,9 @@ export function AnalysisPanel() {
 
 /* ---------- Digital twin ---------- */
 
-const CORE_COLOURS = ['#6a0a52', '#42283a', '#3a2030', '#55164a'];
-const EXT_COLOURS = ['#bfa874', '#bb9238', '#b87a08', '#a06e5e', '#944a38', '#8b3a22'];
+// Core perspectives are teal, extended perspectives are blue and warm.
+const CORE_COLOURS = ['var(--teal-900)', 'var(--teal-700)', 'var(--teal-500)', 'var(--teal-300)'];
+const EXT_COLOURS = ['var(--blue-900)', 'var(--blue-700)', 'var(--blue-500)', 'var(--warm-700)', 'var(--secondary)', 'var(--warm-500)'];
 
 function arc(cx: number, cy: number, r0: number, r1: number, a0: number, a1: number) {
   const pt = (r: number, a: number) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)];
@@ -125,8 +128,8 @@ function PerspectiveRing({ name, onSelect }: { name: string; onSelect: (n: strin
         key={p.name}
         d={arc(120, 120, r0, r1, start + i * step, start + (i + 1) * step)}
         fill={colour}
-        stroke={selected ? '#d0bcff' : '#202125'}
-        strokeWidth={selected ? 4 : 3}
+        stroke={selected ? 'var(--text-primary)' : 'var(--surface-page)'}
+        strokeWidth={selected ? 3 : 2}
         className="cursor-pointer transition-opacity hover:opacity-80"
         role="button"
         tabIndex={0}
@@ -140,23 +143,89 @@ function PerspectiveRing({ name, onSelect }: { name: string; onSelect: (n: strin
     );
   };
   return (
-    <svg viewBox="0 0 240 240" className="size-64 shrink-0 sm:size-72" role="group" aria-label="Perspectives of the digital twin">
+    <svg viewBox="0 0 240 240" className="size-56 shrink-0 sm:size-64" role="group" aria-label="Perspectives of the digital twin">
       {ext.map((p, i) => seg(p, i, ext.length, 66, 118, -60, EXT_COLOURS[i]))}
       {core.map((p, i) => seg(p, i, core.length, 0, 62, -135, CORE_COLOURS[i]))}
     </svg>
   );
 }
 
-
+/** The meter from the design system: a label, a value and a bar. */
 function Confidence({ value }: { value: number }) {
   return (
     <div className="w-40 shrink-0">
-      <p className="text-[10px] uppercase tracking-wide text-muted">Confidence level</p>
-      <div className="mt-1 h-1 rounded bg-panel-hi" role="img" aria-label={`Confidence ${value} out of 100`}>
-        <div className="h-full rounded" style={{ width: `${value}%`, background: value >= 70 ? '#00a884' : value >= 50 ? '#7fa32a' : '#c9a227' }} />
+      <p className="t-caption flex justify-between"><span>Confidence level</span><span className="tnum text-fg">{value}%</span></p>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-[3px] border border-line bg-quiet" role="img" aria-label={`Confidence ${value} out of 100`}>
+        <div className="h-full bg-mark" style={{ width: `${value}%` }} />
       </div>
     </div>
   );
+}
+
+const fmtMoney = (n: number) => `$${n.toLocaleString('en-AU')}`;
+const fmtMeasure = (m: Measure, v: number) => (m === 'Investment' ? fmtMoney(v) : m === 'Projects' ? `${v}` : `${v}%`);
+
+/** The filter droplist from the design: a button that opens a list of measures. */
+function Droplist({ label, value, onChange }: { label: string; value: Measure; onChange: (m: Measure) => void }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', away);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  return (
+    <div ref={box} className="relative">
+      <p className="t-label mb-1">{label}</p>
+      <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${value}`} onClick={() => setOpen((o) => !o)} className="flex min-h-11 w-full items-center justify-between rounded-ctl border border-control bg-page px-3 text-left text-base hover:border-fg-2">
+        {value}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="text-fg-2"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <ul role="listbox" aria-label={label} className="absolute left-0 top-full z-20 mt-1 w-full rounded-ctl border border-line-strong bg-overlay p-1 shadow-elevated">
+          {MEASURES.map((m) => (
+            <li key={m} role="option" aria-selected={m === value}>
+              <button type="button" onClick={() => { onChange(m); setOpen(false); }} className={`flex min-h-11 w-full items-center rounded px-3 text-left text-base hover:bg-quiet active:bg-action-soft ${m === value ? 'bg-action-soft font-semibold' : ''}`}>{m}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** The capability overlay from the design. */
+function CapabilityOverlayCard({ c, onClose, className = '' }: { c: CapabilityData; onClose: () => void; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.focus();
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [onClose]);
+  return (
+    <div ref={ref} tabIndex={-1} role="dialog" aria-label={`${c.name} details`} className={`relative rounded-card border border-line-strong bg-overlay p-6 shadow-modal outline-none ${className}`}>
+      <IconButton label="Close" onClick={onClose} className="absolute right-3 top-3"><X size={20} /></IconButton>
+      <p className="t-eyebrow">Capabilities &gt; {c.type}</p>
+      <h4 className="t-h2 mt-1 pr-10">{c.name}</h4>
+      <p className="mt-3 text-base text-fg-3">{c.text}</p>
+      <dl className="mt-6 grid grid-cols-3 gap-x-4 gap-y-5">
+        {MEASURES.map((m) => (
+          <div key={m}>
+            <dt className="t-eyebrow">{m}</dt>
+            <dd className="t-numeral mt-1">{fmtMeasure(m, c[m])}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => void }) {
+  return <div className="absolute inset-x-0 top-4 z-20 mx-auto w-[min(100%,34rem)]"><CapabilityOverlayCard c={c} onClose={onClose} /></div>;
 }
 
 interface Rect { x: number; y: number; w: number; h: number }
@@ -190,70 +259,8 @@ function squarify(values: number[], W: number, H: number): Rect[] {
   return out;
 }
 
-const fmtMoney = (n: number) => `$${n.toLocaleString('en-AU')}`;
-const fmtMeasure = (m: Measure, v: number) => (m === 'Investment' ? fmtMoney(v) : m === 'Projects' ? `${v}` : `${v}%`);
-
-/** The filter droplist from the design: a button that opens a list of measures. */
-function Droplist({ label, value, onChange }: { label: string; value: Measure; onChange: (m: Measure) => void }) {
-  const [open, setOpen] = useState(false);
-  const box = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('mousedown', away);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', away); document.removeEventListener('keydown', esc); };
-  }, [open]);
-  return (
-    <div ref={box} className="relative">
-      <p className="mb-2 text-base text-white">{label}</p>
-      <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${value}`} onClick={() => setOpen((o) => !o)} className="flex h-14 w-full items-center justify-between rounded-t border-b border-outline bg-field px-4 text-left text-base text-white">
-        {value}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden className="text-[#cac4d0]"><path d="M7 10l5 5 5-5z" /></svg>
-      </button>
-      {open && (
-        <ul role="listbox" aria-label={label} className="absolute left-0 top-full z-30 mt-1 w-full overflow-hidden rounded-2xl bg-field py-3 shadow-xl">
-          {MEASURES.map((m) => (
-            <li key={m} role="option" aria-selected={m === value}>
-              <button type="button" onClick={() => { onChange(m); setOpen(false); }} className={`w-full px-6 py-3.5 text-left text-xl ${m === value ? 'bg-white/10 text-white' : 'text-white hover:bg-white/5'}`}>{m}</button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-/** The capability overlay from the design. */
-function CapabilityOverlayCard({ c, onClose, className = '' }: { c: CapabilityData; onClose: () => void; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    ref.current?.focus();
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', esc);
-    return () => document.removeEventListener('keydown', esc);
-  }, [onClose]);
-  const stat = (m: Measure) => (
-    <div key={m}>
-      <p className="text-sm uppercase tracking-wide text-ink">{m}</p>
-      <p className="text-xl text-ink">{fmtMeasure(m, c[m])}</p>
-    </div>
-  );
-  return (
-    <div ref={ref} tabIndex={-1} role="dialog" aria-label={`${c.name} details`} className={`relative rounded-xl bg-field p-6 shadow-2xl outline-none ${className}`}>
-      <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-white hover:bg-white/10"><X size={26} /></button>
-      <p className="text-base uppercase tracking-wide text-pink">Capabilities &gt; {c.type}</p>
-      <h4 className="mt-1 text-2xl text-white">{c.name}</h4>
-      <p className="mt-3 text-base leading-6 text-[#cac4d0]">{c.text}</p>
-      <div className="mt-6 grid grid-cols-3 gap-x-4 gap-y-5">{MEASURES.map(stat)}</div>
-    </div>
-  );
-}
-
-function CapabilityOverlay({ c, onClose }: { c: CapabilityData; onClose: () => void }) {
-  return <div className="absolute inset-x-0 top-4 z-20 mx-auto w-[min(100%,34rem)]"><CapabilityOverlayCard c={c} onClose={onClose} /></div>;
-}
+// A single-hue ramp from light to dark. The last step needs white text.
+const SCALE = ['var(--teal-200)', 'var(--teal-500)', 'var(--teal-700)', 'var(--teal-900)'];
 
 /** Treemap of capabilities. The two droplists choose what size and colour represent. Selecting a block opens its overlay. */
 function CapabilityChart() {
@@ -276,15 +283,16 @@ function CapabilityChart() {
   const current = CAPABILITY_DATA.find((c) => c.name === open) ?? null;
   return (
     <section aria-label="Capability analysis" className="mt-10 border-t border-line pt-8">
-      <h3 className="mb-4 text-[22px] text-white">Capability analysis</h3>
+      <h3 className="t-h2 mb-4">Capability analysis</h3>
       <div className="grid max-w-3xl gap-4 sm:grid-cols-2">
         <Droplist label="Size represents" value={size} onChange={setSize} />
         <Droplist label="Color represents" value={colour} onChange={setColour} />
       </div>
       <div className="relative mt-6 max-w-4xl">
-        <div className="relative aspect-[100/62] w-full overflow-hidden" role="group" aria-label={`Capabilities sized by ${size.toLowerCase()} and coloured by ${colour.toLowerCase()}`}>
+        <div className="relative aspect-[100/62] w-full overflow-hidden rounded-card border border-line" role="group" aria-label={`Capabilities sized by ${size.toLowerCase()} and coloured by ${colour.toLowerCase()}`}>
           {items.map((c, i) => {
             const r = rects[i];
+            const b = bandOf(c);
             return (
               <button
                 key={c.name}
@@ -292,20 +300,20 @@ function CapabilityChart() {
                 onClick={() => setOpen(open === c.name ? null : c.name)}
                 aria-expanded={open === c.name}
                 aria-label={`${c.name}: ${size} ${fmtMeasure(size, c[size])}. Show details`}
-                className="absolute overflow-hidden border border-black/40 p-2 text-left text-black transition-[filter] hover:brightness-110 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
-                style={{ left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, background: SCALE[bandOf(c)] }}
+                className={`absolute overflow-hidden border border-page p-2 text-left transition-[filter] hover:brightness-110 focus-visible:z-10 focus-visible:-outline-offset-2 ${b === 3 ? 'text-inverse' : 'text-[#1a1a2e]'}`}
+                style={{ left: `${(r.x / W) * 100}%`, top: `${(r.y / H) * 100}%`, width: `${(r.w / W) * 100}%`, height: `${(r.h / H) * 100}%`, background: SCALE[b] }}
               >
-                <span className="block text-[11px] leading-3 opacity-80">{c.name}</span>
-                <span className="block text-sm">{fmtMeasure(size, c[size])}</span>
+                <span className="block text-xs font-medium leading-snug">{c.name}</span>
+                <span className="tnum block text-sm font-semibold">{fmtMeasure(size, c[size])}</span>
               </button>
             );
           })}
         </div>
         {current && <CapabilityOverlay c={current} onClose={() => setOpen(null)} />}
       </div>
-      <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink" aria-label="Colour key">
+      <ul className="t-small mt-4 flex flex-wrap gap-x-6 gap-y-2" aria-label="Colour key">
         {legend.map((l, k) => (
-          <li key={l} className="flex items-center gap-2"><span className="size-3 rounded-sm" style={{ background: SCALE[k] }} aria-hidden />{l}</li>
+          <li key={l} className="flex items-center gap-2"><span className="size-3 rounded-sm border border-line-strong" style={{ background: SCALE[k] }} aria-hidden />{l}</li>
         ))}
       </ul>
     </section>
@@ -317,11 +325,11 @@ export function TwinPanel() {
   const p = PERSPECTIVES.find((x) => x.name === name) ?? PERSPECTIVES[0];
   const List = ({ core }: { core: boolean }) => (
     <>
-      <h4 className="mb-2 mt-4 text-base text-white">{core ? 'Core perspectives' : 'Extended perspectives'}</h4>
+      <h4 className={`t-h3 mb-2 ${core ? '' : 'mt-5'}`}>{core ? 'Core perspectives' : 'Extended perspectives'}</h4>
       <ul className="space-y-1">
         {PERSPECTIVES.filter((x) => x.core === core).map((x) => (
           <li key={x.name}>
-            <button type="button" onClick={() => setName(x.name)} aria-pressed={x.name === name} className={`w-full rounded-full px-6 py-3 text-left text-base ${x.name === name ? 'bg-panel-hi text-primary' : 'text-primary hover:bg-white/5'}`}>
+            <button type="button" onClick={() => setName(x.name)} aria-pressed={x.name === name} className={`min-h-11 w-full rounded-ctl px-4 text-left text-base ${x.name === name ? 'bg-action-soft font-semibold' : 'text-fg-3 hover:bg-quiet active:bg-action-soft'}`}>
               {x.name}
             </button>
           </li>
@@ -331,23 +339,23 @@ export function TwinPanel() {
   );
   return (
     <div className="py-5">
-      <h3 className="mb-4 text-[22px] text-white">Summary of digital twin</h3>
+      <h3 className="t-h2 mb-4">Summary of digital twin</h3>
       <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
         <PerspectiveRing name={name} onSelect={setName} />
-        <p className="max-w-xl font-body text-base leading-8 text-white">{TWIN_SUMMARY}</p>
+        <p className="max-w-[62ch] text-base text-fg-3">{TWIN_SUMMARY}</p>
       </div>
-      <div className="mt-10 grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-0">
-        <nav aria-label="Perspectives" className="lg:-mr-12"><List core /><List core={false} /></nav>
-        <div className="relative z-10 rounded-2xl bg-[#141218] p-6 shadow-xl">
+      <div className="mt-10 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-0">
+        <nav aria-label="Perspectives" className="lg:-mr-8"><List core /><List core={false} /></nav>
+        <div className="relative z-[1] rounded-card border border-line bg-card p-6">
           {p.groups.map((g) => (
             <section key={g.label} className="mb-6 last:mb-0">
-              <p className="text-xs uppercase tracking-wide text-pink">{g.label}</p>
+              <p className="t-eyebrow">{g.label}</p>
               <ul className="mt-3 space-y-5">
                 {g.items.map((i) => (
                   <li key={i.name} className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
                     <div className="min-w-0 flex-1 basis-64">
-                      <p className="text-lg text-white">{i.name}</p>
-                      <p className="text-sm leading-5 text-ink">{i.text.replace(' (authored)', '')}</p>
+                      <p className="t-h3">{i.name}</p>
+                      <p className="t-small text-fg-3">{i.text.replace(' (authored)', '')}</p>
                     </div>
                     <Confidence value={i.confidence} />
                   </li>
@@ -366,52 +374,50 @@ export function TwinPanel() {
 
 export function QualityPanel() {
   const q = QUALITY;
-  const H = ({ children }: { children: string }) => <h3 className="mb-6 text-[28px] text-white">{children}</h3>;
+  const H = ({ children }: { children: string }) => <h3 className="t-h2 mb-4">{children}</h3>;
+  const card = 'rounded-card border border-line bg-card p-6';
   return (
-    <div className="space-y-10 py-5 font-body text-[15px] leading-6 text-white">
-      <p>{q.intro}</p>
-      <hr className="border-line" />
-      <section>
+    <div className="space-y-8 py-5 text-base">
+      <p className="max-w-[62ch] text-fg-3">{q.intro}</p>
+      <section className="border-t border-line pt-6">
         <H>Data accuracy</H>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl bg-rail p-6">
-            <h4 className="mb-4 font-medium">Metrics</h4>
-            <p>{q.accuracy.metricsIntro}</p>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className={card}>
+            <h4 className="t-h3 mb-3">Metrics</h4>
+            <p className="text-fg-3">{q.accuracy.metricsIntro}</p>
             {q.accuracy.metrics.map((m) => (
-              <div key={m.value} className="mt-4"><p className="text-[28px] leading-8">{m.value}</p><p>{m.text}</p></div>
+              <div key={m.value} className="mt-4"><p className="t-stat">{m.value}</p><p className="text-fg-3">{m.text}</p></div>
             ))}
           </div>
-          <div className="rounded-xl bg-rail p-6">
-            <h4 className="mb-4 font-medium">Indicators</h4>
+          <div className={card}>
+            <h4 className="t-h3 mb-3">Indicators</h4>
             {q.accuracy.indicators.map((m) => (
-              <div key={m.value} className="mb-6"><p className="text-[28px] leading-8">{m.value}</p><p>{m.text}</p></div>
+              <div key={m.value} className="mb-5 last:mb-0"><p className="t-stat">{m.value}</p><p className="text-fg-3">{m.text}</p></div>
             ))}
           </div>
         </div>
       </section>
-      <hr className="border-line" />
-      <section>
+      <section className="border-t border-line pt-6">
         <H>Data consistency</H>
-        <h4 className="mb-2 font-medium">Assessment</h4>
-        <p>{q.consistency.assessment}</p>
-        <h4 className="mb-2 mt-6 font-medium">Inconsistent Data</h4>
-        <ul className="list-disc space-y-2 pl-6">{q.consistency.inconsistent.map((t) => <li key={t}>{t}</li>)}</ul>
+        <h4 className="t-h3 mb-2">Assessment</h4>
+        <p className="max-w-[62ch] text-fg-3">{q.consistency.assessment}</p>
+        <h4 className="t-h3 mb-2 mt-6">Inconsistent data</h4>
+        <ul className="max-w-[62ch] list-disc space-y-1 pl-6 text-fg-3">{q.consistency.inconsistent.map((t) => <li key={t}>{t}</li>)}</ul>
       </section>
-      <hr className="border-line" />
-      <section>
+      <section className="border-t border-line pt-6">
         <H>Data source transparency</H>
-        <h4 className="mb-2 font-medium">Source Information</h4>
-        <p>{q.transparency.intro}</p>
-        <ul className="mt-4 space-y-3">
+        <h4 className="t-h3 mb-2">Source information</h4>
+        <p className="text-fg-3">{q.transparency.intro}</p>
+        <ul className="mt-4 divide-y divide-line rounded-card border border-line">
           {q.transparency.sources.map((s) => (
-            <li key={s.name} className="flex items-start justify-between gap-6">
-              <p><strong className="font-medium">{s.name}:</strong> {s.text}</p>
-              <p className="text-[22px]">{s.pct}%</p>
+            <li key={s.name} className="flex items-start justify-between gap-6 px-4 py-3">
+              <p><strong className="font-semibold">{s.name}:</strong> <span className="text-fg-3">{s.text}</span></p>
+              <p className="t-numeral">{s.pct}%</p>
             </li>
           ))}
         </ul>
-        <h4 className="mb-2 mt-8 font-medium">Source Credibility</h4>
-        <p>{q.transparency.credibility}</p>
+        <h4 className="t-h3 mb-2 mt-6">Source credibility</h4>
+        <p className="max-w-[62ch] text-fg-3">{q.transparency.credibility}</p>
       </section>
     </div>
   );
@@ -424,9 +430,9 @@ const ADMIN = 'Alex Bizarcher';
 function Reviewers({ n }: { n: number }) {
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-wide text-muted">{n} of 4 reviewers</p>
+      <p className="t-caption">{n} of 4 reviewers</p>
       <div className="mt-1 flex gap-1" aria-hidden>
-        {[0, 1, 2, 3].map((i) => <span key={i} className={`h-1 w-6 rounded ${i < n ? 'bg-teal' : 'bg-panel-hi'}`} />)}
+        {[0, 1, 2, 3].map((i) => <span key={i} className={`h-1.5 w-6 rounded-[3px] ${i < n ? 'bg-mark' : 'border border-line bg-quiet'}`} />)}
       </div>
     </div>
   );
@@ -439,12 +445,12 @@ export function TwinModal({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     ref.current?.focus();
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') (detail && !CAPABILITY_DATA.some((c) => c.name === detail.name) ? setDetail(null) : !detail && onClose()); };
     document.addEventListener('keydown', esc);
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', esc); document.body.style.overflow = overflow; prev?.focus?.(); };
-  }, [onClose]);
+  }, [onClose, detail]);
 
   const count = (p: (typeof PERSPECTIVES)[number]) => p.groups.reduce((n, g) => n + g.items.length, 0);
   const all = PERSPECTIVES.flatMap((p) => p.groups.flatMap((g) => g.items));
@@ -454,11 +460,11 @@ export function TwinModal({ onClose }: { onClose: () => void }) {
 
   const Nav = ({ core }: { core: boolean }) => (
     <>
-      <h3 className={`text-xl text-white ${core ? '' : 'mt-6'}`}>{core ? 'Core' : 'Extended'}</h3>
+      <h3 className={`t-h3 ${core ? '' : 'mt-5'}`}>{core ? 'Core' : 'Extended'}</h3>
       <ul className="mt-2 space-y-1">
         {PERSPECTIVES.filter((x) => x.core === core).map((x) => (
           <li key={x.name}>
-            <button type="button" onClick={() => setName(x.name)} aria-pressed={x.name === name} className={`w-full rounded-full px-3 py-1.5 text-left text-base ${x.name === name ? 'bg-black font-medium text-white' : 'text-primary hover:bg-white/5'}`}>
+            <button type="button" onClick={() => setName(x.name)} aria-pressed={x.name === name} className={`min-h-11 w-full rounded-ctl px-3 text-left text-base ${x.name === name ? 'bg-action-soft font-semibold' : 'text-fg-3 hover:bg-quiet active:bg-action-soft'}`}>
               {x.name} ({count(x)})
             </button>
           </li>
@@ -468,50 +474,50 @@ export function TwinModal({ onClose }: { onClose: () => void }) {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Digital twin" className="relative w-full max-w-[1110px] rounded-2xl bg-panel pb-6 outline-none">
-        <header className="flex items-center justify-between rounded-t-2xl bg-[#2b2930] px-5 py-4 sm:px-6">
-          <h2 className="text-2xl text-white">Digital twin</h2>
-          <button type="button" onClick={onClose} className="inline-flex h-12 items-center gap-2 rounded-full border border-outline px-6 text-base text-white hover:bg-white/10"><X size={18} aria-hidden /> Close</button>
+    <div className="fixed inset-0 z-30 flex items-start justify-center overflow-y-auto bg-scrim p-3 sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Digital twin" className="z-40 w-full max-w-[1110px] rounded-card border border-line bg-overlay pb-6 shadow-modal outline-none">
+        <header className="flex items-center justify-between gap-4 border-b border-line px-6 py-4">
+          <h2 className="t-h2">Digital twin</h2>
+          <Button onClick={onClose}><X size={20} aria-hidden /> Close</Button>
         </header>
-        <div className="grid gap-6 px-5 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto]">
-          <div className="font-body text-base leading-6 text-white">
-            <p>The admin for the digital twin is <span className="text-primary">{ADMIN}</span>.</p>
+        <div className="grid gap-6 px-6 py-5 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="max-w-[62ch] space-y-2 text-base text-fg-3">
+            <p>The admin for the digital twin is <span className="font-semibold text-fg">{ADMIN}</span>.</p>
             <p>{TWIN_SUMMARY.replace('organization', 'organisation')}</p>
           </div>
-          <dl className="flex gap-8 border-l border-line pl-6 md:flex-col md:gap-3">
-            <div><dd className="inline text-[28px] text-ink">{all.length}</dd> <dt className="inline text-sm uppercase text-ink">Perspectives</dt></div>
-            <div><dd className="inline text-[28px] text-ink">{overall}%</dd> <dt className="inline text-sm text-ink">Overall confidence</dt></div>
+          <dl className="flex gap-8 border-line md:flex-col md:gap-4 md:border-s md:ps-6">
+            <div><dd className="t-stat">{all.length}</dd><dt className="t-caption">Perspectives</dt></div>
+            <div><dd className="t-stat">{overall}%</dd><dt className="t-caption">Overall confidence</dt></div>
           </dl>
         </div>
-        <div className="grid gap-4 px-5 sm:px-6 md:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="grid gap-6 px-6 md:grid-cols-[210px_minmax(0,1fr)]">
           <nav aria-label="Perspectives"><Nav core /><Nav core={false} /></nav>
-          <section aria-label={p.name} className="rounded-xl bg-[#202125] p-4 sm:p-6">
-            <h3 className="mb-5 text-xl text-white">{p.core ? 'Core' : 'Extended'} &gt; {p.name} <span className="ml-2 text-sm uppercase text-pink">{count(p)} perspectives</span></h3>
+          <section aria-label={p.name} className="rounded-card border border-line bg-quiet p-6">
+            <h3 className="t-h3 mb-5">{p.core ? 'Core' : 'Extended'} &gt; {p.name} <span className="t-eyebrow ml-2">{count(p)} perspectives</span></h3>
             <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {p.groups.flatMap((g) => g.items.map((i) => ({ g, i }))).map(({ g, i }) => (
-                <li key={i.name} className="flex flex-col rounded-lg bg-[#141218] p-4">
-                  <p className="text-xs uppercase tracking-wide text-pink">{g.label}</p>
-                  <h4 className="mt-2 text-lg text-white">{i.name}</h4>
-                  <p className="mt-1 flex-1 text-sm leading-5 text-[#cac4d0]">{i.text}</p>
+                <li key={i.name} className="flex flex-col rounded-card border border-line bg-card p-4">
+                  <p className="t-eyebrow">{g.label}</p>
+                  <h4 className="t-h3 mt-2">{i.name}</h4>
+                  <p className="t-small mt-1 flex-1 text-fg-3">{i.text}</p>
                   <div className="mt-4"><Confidence value={i.confidence} /></div>
                   <div className="mt-3"><Reviewers n={i.reviewers ?? 4} /></div>
-                  <button type="button" onClick={() => setDetail({ name: i.name, label: g.label, text: i.text, confidence: i.confidence, reviewers: i.reviewers ?? 4 })} aria-label={`Details: ${i.name}`} className="mt-4 h-10 self-start rounded-full border border-outline px-6 text-sm text-white hover:bg-white/10">Details</button>
+                  <Button className="mt-4 self-start" onClick={() => setDetail({ name: i.name, label: g.label, text: i.text, confidence: i.confidence, reviewers: i.reviewers ?? 4 })} aria-label={`Details: ${i.name}`}>View details</Button>
                 </li>
               ))}
             </ul>
           </section>
         </div>
         {detail && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onMouseDown={(e) => e.target === e.currentTarget && setDetail(null)}>
+          <div className="fixed inset-0 z-50 grid place-items-center bg-scrim p-4" onMouseDown={(e) => e.target === e.currentTarget && setDetail(null)}>
             {cap ? (
               <div className="relative w-full max-w-lg"><CapabilityOverlayCard c={cap} onClose={() => setDetail(null)} /></div>
             ) : (
-              <div role="dialog" aria-label={`${detail.name} details`} className="relative w-full max-w-lg rounded-xl bg-field p-6 shadow-2xl">
-                <button type="button" onClick={() => setDetail(null)} aria-label="Close" className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-white hover:bg-white/10"><X size={26} /></button>
-                <p className="text-base uppercase tracking-wide text-pink">{detail.label}</p>
-                <h4 className="mt-1 text-2xl text-white">{detail.name}</h4>
-                <p className="mt-3 text-base leading-6 text-[#cac4d0]">{detail.text}</p>
+              <div role="dialog" aria-label={`${detail.name} details`} className="relative w-full max-w-lg rounded-card border border-line-strong bg-overlay p-6 shadow-modal">
+                <IconButton label="Close" onClick={() => setDetail(null)} className="absolute right-3 top-3"><X size={20} /></IconButton>
+                <p className="t-eyebrow">{detail.label}</p>
+                <h4 className="t-h2 mt-1 pr-10">{detail.name}</h4>
+                <p className="mt-3 text-base text-fg-3">{detail.text}</p>
                 <div className="mt-6 grid gap-5 sm:grid-cols-2"><Confidence value={detail.confidence} /><Reviewers n={detail.reviewers} /></div>
               </div>
             )}

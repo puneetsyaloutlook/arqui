@@ -1,33 +1,33 @@
-export const DEPARTMENTS = ['Information Technology', 'Finance', 'Operations', 'Human Resources', 'Risk & Compliance', 'Customer Service', 'Sales & Marketing', 'Legal'];
+export const DEPARTMENTS = ['Information technology', 'Finance', 'Operations', 'Human resources', 'Risk and compliance', 'Customer service', 'Sales and marketing', 'Legal'];
 
 export const JOB_TITLES = [
-  'Chief Information Officer',
-  'Chief Financial Officer',
-  'Chief Operating Officer',
-  'Chief Executive Officer',
-  'Head of Technology',
-  'Operations Manager',
-  'Finance Manager',
-  'HR Manager',
-  'Risk and Compliance Manager',
-  'Customer Service Manager',
-  'Business Analyst',
+  'Chief information officer',
+  'Chief financial officer',
+  'Chief operating officer',
+  'Chief executive officer',
+  'Head of technology',
+  'Operations manager',
+  'Finance manager',
+  'HR manager',
+  'Risk and compliance manager',
+  'Customer service Manager',
+  'Business analyst',
 ];
 
 export const INTERESTS = [
-  'Finance & Performance',
-  'Workforce & Talent',
-  'Market & Customer Trends',
-  'Risk & Compliance',
-  'Innovation & Technology',
-  'Sustainability & Social Responsibility',
+  'Finance and performance',
+  'Workforce and talent',
+  'Market and customer trends',
+  'Risk and compliance',
+  'Innovation and technology',
+  'Sustainability and social responsibility',
 ];
 
-/** A simulated AI summary of the role. The Chief Information Officer text comes from the design. */
+/** A simulated AI summary of the role. The Chief information officer text comes from the design. */
 export function describeRole(title: string, department: string): string {
-  if (title === 'Chief Information Officer') {
+  if (title === 'Chief information officer') {
     return [
-      "As the Chief Information Officer, you play a pivotal role in driving Acme's digital strategy and ensuring the effective utilisation of information technology to achieve strategic objectives. Your responsibilities likely encompass:",
+      "As the chief information officer, you play a pivotal role in driving Acme's digital strategy and ensuring the effective utilisation of information technology to achieve strategic objectives. Your responsibilities likely encompass:",
       '• Leading the IT department: Overseeing all technology operations, including infrastructure, applications, and cybersecurity.',
       '• Formulating IT strategy: Aligning technology investments with business goals, ensuring innovation and efficient resource allocation.',
       '• Managing IT governance: Establishing policies and frameworks for IT security, data privacy, and compliance.',

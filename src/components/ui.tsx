@@ -1,39 +1,42 @@
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
-import { Bot, User, UsersRound, X } from 'lucide-react';
+import { Bot, CircleAlert, User, UsersRound, X } from 'lucide-react';
 import type { Origin } from '../data/seed';
 
-const cx = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join(' ');
+export const cx = (...parts: (string | false | undefined | null)[]) => parts.filter(Boolean).join(' ');
 
-type Variant = 'filled' | 'outlined' | 'tonal' | 'text';
+/* Buttons follow the design system: primary, secondary and tertiary. The older names map to them. */
+type Variant = 'primary' | 'secondary' | 'tertiary' | 'filled' | 'outlined' | 'tonal' | 'text';
+const BTN: Record<'primary' | 'secondary' | 'tertiary', string> = {
+  primary: 'border-transparent bg-action text-on-action hover:[background-image:linear-gradient(var(--press-hover),var(--press-hover))] active:[background-image:linear-gradient(var(--press-active),var(--press-active))] disabled:bg-line disabled:text-fg-off disabled:[background-image:none]',
+  secondary: 'border-action text-action hover:bg-action-soft disabled:border-line disabled:text-fg-off disabled:hover:bg-transparent',
+  tertiary: 'border-transparent px-3 text-action hover:underline hover:underline-offset-[3px] active:bg-action-soft disabled:text-fg-off disabled:no-underline',
+};
+const ALIAS = { filled: 'primary', outlined: 'secondary', tonal: 'secondary', text: 'tertiary' } as const;
 
-export function Button({ variant = 'outlined', className, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  const styles: Record<Variant, string> = {
-    filled: 'bg-primary text-on-primary hover:bg-[#e0d2ff] disabled:bg-white/10 disabled:text-white/40',
-    outlined: 'border border-outline text-primary hover:bg-primary/10 disabled:opacity-40',
-    tonal: 'bg-panel-hi text-primary hover:bg-[#36343b]',
-    text: 'text-primary hover:bg-primary/10',
-  };
+export function Button({ variant = 'secondary', className, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+  const v = (ALIAS as Record<string, 'primary' | 'secondary' | 'tertiary'>)[variant] ?? (variant as 'primary' | 'secondary' | 'tertiary');
   return (
     <button
       type="button"
       {...rest}
-      className={cx('inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full px-5 text-sm font-medium tracking-[0.1px] transition-colors disabled:cursor-not-allowed', styles[variant], className)}
+      className={cx('inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-ctl border px-6 text-sm font-semibold leading-none tracking-[0.005em] transition-colors disabled:cursor-not-allowed', BTN[v], className)}
     />
   );
 }
 
 export function IconButton({ label, className, children, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
   return (
-    <button type="button" aria-label={label} title={label} {...rest} className={cx('inline-flex size-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-white/10', className)}>
+    <button type="button" aria-label={label} title={label} {...rest} className={cx('inline-flex size-11 items-center justify-center rounded-ctl text-fg transition-colors hover:bg-quiet active:bg-action-soft disabled:text-fg-off', className)}>
       {children}
     </button>
   );
 }
 
+/** A tag: the one place the design system uses a pill. */
 export function Chip({ origin, children, className }: { origin?: Origin; children: ReactNode; className?: string }) {
   return (
-    <span className={cx('inline-flex h-8 items-center gap-1.5 rounded-lg border border-chip px-3 text-xs font-medium uppercase tracking-[0.5px] text-subtle', className)}>
-      {origin === 'user' ? <User size={14} aria-hidden /> : origin ? <Bot size={14} aria-hidden /> : null}
+    <span className={cx('t-caption inline-flex min-h-6 items-center gap-1 rounded-full border border-line bg-quiet px-3 py-0.5 !text-fg-2', className)}>
+      {origin === 'user' ? <User size={16} aria-hidden /> : origin ? <Bot size={16} aria-hidden /> : null}
       {children}
     </span>
   );
@@ -42,8 +45,8 @@ export function Chip({ origin, children, className }: { origin?: Origin; childre
 export function CollabChip({ count }: { count?: number }) {
   if (!count) return null;
   return (
-    <span className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-chip px-2.5 text-xs text-subtle" title={`${count} collaborator${count > 1 ? 's' : ''}`}>
-      <UsersRound size={14} aria-hidden />
+    <span className="t-caption inline-flex min-h-6 items-center gap-1 rounded-full border border-line bg-quiet px-2 py-0.5" title={`${count} collaborator${count > 1 ? 's' : ''}`}>
+      <UsersRound size={16} aria-hidden />
       <span className="sr-only">{count} collaborators</span>
     </span>
   );
@@ -53,31 +56,32 @@ export const originLabel: Record<Origin, string> = { auto: 'Auto-generated', use
 
 export function Checkbox({ label, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: ReactNode }) {
   return (
-    <label className={cx('flex cursor-pointer items-center gap-3 py-1.5 text-base text-ink', className)}>
-      <input type="checkbox" {...rest} className="size-[18px] shrink-0 cursor-pointer accent-[#d0bcff]" />
+    <label className={cx('flex min-h-11 cursor-pointer items-center gap-3 text-base', className)}>
+      <input type="checkbox" {...rest} className="size-[18px] shrink-0 cursor-pointer accent-[var(--action)]" />
       <span>{label}</span>
     </label>
   );
 }
 
-const fieldBase = 'peer w-full rounded-t bg-field px-4 pt-6 pb-2 text-base text-white outline-none border-b border-outline focus:border-b-2 focus:border-primary placeholder-transparent';
-const floatLabel = 'pointer-events-none absolute left-4 top-4 origin-left text-base text-[#cac4d0] transition-all peer-focus:top-1.5 peer-focus:text-xs peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:text-xs';
+const input = 'w-full min-h-11 rounded-ctl border border-control bg-page px-3 py-2 text-base leading-snug text-fg transition-[border-color,box-shadow] hover:border-fg-2 focus:border-action focus:shadow-[0_0_0_1px_var(--action)] focus:outline-none placeholder:text-fg-2 aria-[invalid=true]:border-danger aria-[invalid=true]:shadow-[0_0_0_1px_var(--status-error)] disabled:border-line disabled:bg-quiet disabled:text-fg-off';
 
-export function TextField({ label, error, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
+function FieldError({ id, children }: { id: string; children: ReactNode }) {
+  return (
+    <p id={id} role="alert" className="t-small mt-1 flex items-start gap-2 text-fg">
+      <CircleAlert size={16} aria-hidden className="mt-0.5 shrink-0 text-danger" />
+      {children}
+    </p>
+  );
+}
+
+export function TextField({ label, error, hint, className, ...rest }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string; hint?: string }) {
   const id = useId();
   return (
     <div className={className}>
-      <div className="relative">
-        <input id={id} placeholder=" " {...rest} aria-invalid={!!error} aria-describedby={error ? `${id}-err` : undefined} className={fieldBase} />
-        <label htmlFor={id} className={floatLabel}>
-          {label}
-        </label>
-      </div>
-      {error && (
-        <p id={`${id}-err`} role="alert" className="mt-1 px-4 text-xs text-[#f2b8b5]">
-          {error}
-        </p>
-      )}
+      <label htmlFor={id} className="t-label mb-1 block">{label}</label>
+      <input id={id} {...rest} aria-invalid={!!error} aria-describedby={cx(error && `${id}-err`, hint && `${id}-hint`) || undefined} className={input} />
+      {hint && !error && <p id={`${id}-hint`} className="t-small mt-1 text-fg-2">{hint}</p>}
+      {error && <FieldError id={`${id}-err`}>{error}</FieldError>}
     </div>
   );
 }
@@ -85,33 +89,26 @@ export function TextField({ label, error, className, ...rest }: InputHTMLAttribu
 export function TextArea({ label, className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string }) {
   const id = useId();
   return (
-    <div className={cx('relative', className)}>
-      <textarea id={id} placeholder=" " {...rest} className={cx(fieldBase, 'min-h-24 resize-y')} />
-      <label htmlFor={id} className={floatLabel}>
-        {label}
-      </label>
+    <div className={className}>
+      <label htmlFor={id} className="t-label mb-1 block">{label}</label>
+      <textarea id={id} {...rest} className={cx(input, 'min-h-24 resize-y')} />
     </div>
   );
 }
 
-export function Select({ label, options, className, ...rest }: SelectHTMLAttributes<HTMLSelectElement> & { label: string; options: string[] }) {
+export function Select({ label, options, error, className, ...rest }: SelectHTMLAttributes<HTMLSelectElement> & { label: string; options: string[]; error?: string }) {
   const id = useId();
   return (
-    <div className={cx('relative', className)}>
-      <select id={id} {...rest} className={cx(fieldBase, 'appearance-none pr-10')}>
-        <option value="" disabled hidden />
-        {options.map((o) => (
-          <option key={o} value={o} className="bg-field">
-            {o}
-          </option>
-        ))}
-      </select>
-      <label htmlFor={id} className="pointer-events-none absolute left-4 top-1.5 text-xs text-[#cac4d0]">
-        {label}
-      </label>
-      <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#cac4d0]" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-        <path d="M7 10l5 5 5-5z" />
-      </svg>
+    <div className={className}>
+      {label && <label htmlFor={id} className="t-label mb-1 block">{label}</label>}
+      <div className="relative">
+        <select id={id} {...rest} aria-invalid={!!error} aria-describedby={error ? `${id}-err` : undefined} className={cx(input, 'appearance-none pr-10')}>
+          <option value="" disabled hidden>Choose one</option>
+          {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-fg-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M6 9l6 6 6-6" /></svg>
+      </div>
+      {error && <FieldError id={`${id}-err`}>{error}</FieldError>}
     </div>
   );
 }
@@ -130,15 +127,11 @@ export function Modal({ title, onClose, children, wide }: { title: string; onClo
     };
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={cx('max-h-[90dvh] w-full overflow-y-auto rounded-2xl bg-panel p-6 shadow-2xl outline-none', wide ? 'max-w-3xl' : 'max-w-lg')}>
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-2xl text-white">
-            {title}
-          </h2>
-          <IconButton label="Close" onClick={onClose} className="-mr-2 -mt-2">
-            <X size={20} />
-          </IconButton>
+    <div className="fixed inset-0 z-30 grid place-items-center bg-scrim p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={cx('z-40 flex max-h-[calc(100dvh-4rem)] w-full flex-col gap-4 overflow-auto rounded-card border border-line bg-overlay p-6 shadow-modal outline-none', wide ? 'max-w-3xl' : 'max-w-[520px]')}>
+        <div className="flex items-start justify-between gap-4">
+          <h2 id={titleId} className="t-h2">{title}</h2>
+          <IconButton label="Close" onClick={onClose} className="-mr-3 -mt-2"><X size={20} /></IconButton>
         </div>
         {children}
       </div>
@@ -148,45 +141,36 @@ export function Modal({ title, onClose, children, wide }: { title: string; onClo
 
 export function Toast({ message }: { message: string | null }) {
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-[60] flex justify-center px-4">
-      {message && <div className="rounded-lg bg-[#e6e0e9] px-4 py-3 text-sm text-[#322f35] shadow-lg">{message}</div>}
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
+      {message && <div className="t-small rounded-ctl border border-line-strong bg-overlay px-4 py-3 text-fg shadow-elevated">{message}</div>}
     </div>
   );
 }
 
 /**
  * Renders answer text. Lines are classified like this:
- *  - "1. Heading" or a short line ending in a colon: a heading
- *  - "Label: text" (label under 60 characters): a list item with a bold label
+ *  - "1. Heading" or a short line ending in a colon: a subheading
+ *  - "Label: text" (label under 60 characters), or a line starting with a bullet: a list item with a bold label
  *  - anything else: a paragraph
  */
 export function RichText({ lines }: { lines: readonly string[] }) {
   return (
-    <div className="space-y-2 text-[15px] leading-6 text-ink">
+    <div className="space-y-2 text-base leading-relaxed text-fg">
       {lines.map((raw, i) => {
         const bullet = raw.startsWith('• ');
         const line = bullet ? raw.slice(2) : raw;
         const numbered = /^\d+\.\s/.test(line);
         const isHeading = (numbered && line.length < 120 && !/\.\s.+\./.test(line.replace(/^\d+\.\s/, ''))) || (line.endsWith(':') && line.length < 70);
-        if (bullet) {
-          const b = line.match(/^([^:]{3,60}):\s(.+)$/s);
-          return (
-            <p key={i} className="pl-4 -indent-4 before:mr-2 before:content-['•']">
-              {b ? <strong className="font-medium text-white">{b[1]}: </strong> : null}
-              {b ? b[2] : line}
-            </p>
-          );
-        }
-        if (isHeading) return <h4 key={i} className="pt-2 font-medium text-white">{line}</h4>;
         const m = line.match(/^([^:]{3,60}):\s(.+)$/s);
-        if (m) {
+        if (bullet || (!isHeading && m)) {
           return (
             <p key={i} className="pl-4 -indent-4 before:mr-2 before:content-['•']">
-              <strong className="font-medium text-white">{m[1]}: </strong>
-              {m[2]}
+              {m ? <strong className="font-semibold">{m[1]}: </strong> : null}
+              {m ? m[2] : line}
             </p>
           );
         }
+        if (isHeading) return <h4 key={i} className="pt-2 font-semibold">{line}</h4>;
         return <p key={i}>{line}</p>;
       })}
     </div>

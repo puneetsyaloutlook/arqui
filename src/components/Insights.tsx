@@ -13,13 +13,13 @@ export function InsightCard({ insight, selected, onSelect }: { insight: Insight;
         type="button"
         onClick={onSelect}
         aria-current={selected ? 'true' : undefined}
-        className={`w-full rounded-2xl p-3.5 text-left transition-colors ${selected ? 'bg-panel-hi' : 'bg-rail hover:bg-panel'}`}
+        className={`block w-full rounded-card border bg-card p-4 text-left transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-subtle active:bg-quiet active:shadow-none ${selected ? 'border-action shadow-[0_0_0_1px_var(--action)]' : 'border-line'}`}
       >
-        <span className={`block text-base leading-6 ${selected ? 'text-teal' : 'text-primary'}`}>{insight.title}</span>
+        <span className="block text-base font-semibold leading-snug">{insight.title}</span>
         <span className="mt-3 flex flex-wrap gap-2">
           {insight.pinned ? (
             <>
-              <Chip><Lock size={14} aria-hidden /> Default view</Chip>
+              <Chip><Lock size={16} aria-hidden /> Default view</Chip>
               {insight.theme === 'Digital twin' && <Chip>Digital twin</Chip>}
             </>
           ) : (
@@ -67,35 +67,35 @@ export function InsightList({
 
   return (
     <section aria-label="Insights" className={`flex flex-col ${className}`}>
-      <div className="relative flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 px-1 pb-3">
-        <Button variant="text" onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen} className="!px-3 !text-primary">
-          <ListFilter size={18} aria-hidden /> Filter insights{active ? ` (${active})` : ''}
+      <div className="relative flex shrink-0 flex-wrap items-center gap-x-1 gap-y-2 pb-3">
+        <Button variant="tertiary" onClick={() => setFilterOpen((o) => !o)} aria-expanded={filterOpen}>
+          <ListFilter size={20} aria-hidden /> Filter insights{active ? ` (${active})` : ''}
         </Button>
-        <Button variant="text" onClick={() => setSort((s) => (s === 'date' ? 'title' : 'date'))} className="!px-3 !text-primary">
+        <Button variant="tertiary" onClick={() => setSort((s) => (s === 'date' ? 'title' : 'date'))}>
           Sort by: {sort === 'date' ? 'Date' : 'Title'}
         </Button>
-        <Button variant="tonal" className="ml-auto !bg-[#36343b]" onClick={() => setChat('')}>
-          <Plus size={18} aria-hidden /> Start new chat
+        <Button variant="primary" className="ml-auto" onClick={() => setChat('')}>
+          <Plus size={20} aria-hidden /> Start new chat
         </Button>
         {filterOpen && (
-          <div className="absolute left-0 top-full z-20 mt-1 max-h-[60dvh] w-[min(100%,340px)] overflow-y-auto rounded-2xl bg-panel p-4 shadow-xl">
-            <p className="mb-1 text-xs uppercase tracking-wide text-muted">By theme</p>
+          <div className="absolute left-0 top-full z-20 mt-1 max-h-[60dvh] w-[min(100%,340px)] overflow-y-auto rounded-ctl border border-line-strong bg-overlay p-4 shadow-elevated">
+            <p className="t-eyebrow mb-1">By theme</p>
             {allThemes.map((t) => (
               <Checkbox key={t} label={t} checked={themes.includes(t)} onChange={() => setThemes(toggle(themes, t))} />
             ))}
-            <p className="mb-1 mt-3 text-xs uppercase tracking-wide text-muted">By type</p>
+            <p className="t-eyebrow mb-1 mt-3">By type</p>
             {(['auto', 'user', 'self'] as Origin[]).map((o) => (
               <Checkbox key={o} label={originLabel[o]} checked={origins.includes(o)} onChange={() => setOrigins(toggle(origins, o))} />
             ))}
             <div className="mt-3 flex justify-between">
-              <Button variant="text" onClick={() => { setThemes([]); setOrigins([]); }}>Clear</Button>
-              <Button variant="filled" onClick={() => setFilterOpen(false)}>Done</Button>
+              <Button variant="tertiary" onClick={() => { setThemes([]); setOrigins([]); }}>Clear filters</Button>
+              <Button variant="primary" onClick={() => setFilterOpen(false)}>Apply filters</Button>
             </div>
           </div>
         )}
       </div>
       {extraTop}
-      <ul className="space-y-2.5 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+      <ul className="space-y-3 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
         {insights.filter((i) => i.pinned).map((i) => (
           <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
         ))}
@@ -103,7 +103,7 @@ export function InsightList({
         {shown.map((i) => (
           <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
         ))}
-        {shown.length === 0 && <li className="rounded-2xl bg-rail p-4 text-sm text-muted">No insights match these filters.</li>}
+        {shown.length === 0 && <li className="t-small rounded-card border border-dashed border-control p-4 text-fg-2">No insights match these filters. Clear a filter to see more.</li>}
       </ul>
       {chat !== null && (
         <Modal title="Start a new chat" onClose={() => setChat(null)}>
@@ -117,11 +117,11 @@ export function InsightList({
               onSelect(created.id);
             }}
           >
-            <p className="text-sm text-muted">Ask a question about your organisation. Arqui creates a new insight from it that you can come back to.</p>
+            <p className="text-base text-fg-3">Ask a question about your organisation. Arqui creates a new insight from it that you can come back to.</p>
             <TextArea label="Your question" value={chat} onChange={(e) => setChat(e.target.value)} autoFocus required />
             <div className="flex justify-end gap-2">
-              <Button variant="text" onClick={() => setChat(null)}>Cancel</Button>
-              <Button variant="filled" type="submit" disabled={!chat.trim()}>Start chat</Button>
+              <Button variant="tertiary" onClick={() => setChat(null)}>Cancel</Button>
+              <Button variant="primary" type="submit" disabled={!chat.trim()}>Start chat</Button>
             </div>
           </form>
         </Modal>
@@ -132,8 +132,8 @@ export function InsightList({
 
 export function BackToList({ onClick, label = 'Back to insights' }: { onClick: () => void; label?: string }) {
   return (
-    <Button variant="text" onClick={onClick} className="mb-2 self-start lg:hidden">
-      <ArrowLeft size={18} aria-hidden /> {label}
+    <Button variant="tertiary" onClick={onClick} className="mb-2 self-start lg:hidden">
+      <ArrowLeft size={20} aria-hidden /> {label}
     </Button>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BadgeCheck, Bookmark, Download, Pencil, RefreshCw, Send, Share2, Trash2, Upload } from 'lucide-react';
+import { BadgeCheck, Bookmark, Bot, Download, Pencil, RefreshCw, Send, Share2, Trash2, Upload } from 'lucide-react';
 import { SCRIPTED, actionsFor, deliverablesFor, reportFor, summaryFor, starterQuestions } from '../data/chat';
 import { AREA_LABEL, type Insight } from '../data/seed';
 import { useApp, type Message } from '../state/store';
@@ -26,23 +26,23 @@ const download = (name: string, text: string) => {
 function SourcesModal({ insight, onClose }: { insight: Insight; onClose: () => void }) {
   return (
     <Modal title="Sources" onClose={onClose} wide>
-      <div className="space-y-5 text-sm leading-6 text-ink">
-        <p className="text-muted">Arqui uses these sources to answer questions about "{insight.title}". The more documents you upload, the more complete the answers become.</p>
+      <div className="space-y-5 text-sm leading-6 text-fg">
+        <p className="text-fg-2">Arqui uses these sources to answer questions about "{insight.title}". The more documents you upload, the more complete the answers become.</p>
         <div>
-          <h3 className="font-medium text-white">1. Documents uploaded to Arqui</h3>
-          <ul className="mt-1 list-disc space-y-1 pl-5 text-muted">
+          <h3 className="font-medium text-fg">1. Documents uploaded to Arqui</h3>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-fg-2">
             <li>Meeting_Minutes_Exec_Stakeholders_Q1_2023.docx</li>
             <li>Internal_External_Audit_Reports_2022-2023.pdf</li>
             <li>Technology_Roadmaps_2023-2025.xlsx</li>
           </ul>
         </div>
         <div>
-          <h3 className="font-medium text-white">2. Elements of the digital twin</h3>
-          <p className="mt-1 text-muted">Core, Capabilities, Enabling: Information Technology (IT) capabilities, including the security operations centre.</p>
+          <h3 className="font-medium text-fg">2. Elements of the digital twin</h3>
+          <p className="mt-1 text-fg-2">Core, Capabilities, Enabling: Information Technology (IT) capabilities, including the security operations centre.</p>
         </div>
         <div>
-          <h3 className="font-medium text-white">3. External websites</h3>
-          <p className="mt-1 text-muted">Public guidance from reputable industry bodies and regulators, summarised by Arqui.</p>
+          <h3 className="font-medium text-fg">3. External websites</h3>
+          <p className="mt-1 text-fg-2">Public guidance from reputable industry bodies and regulators, summarised by Arqui.</p>
         </div>
       </div>
     </Modal>
@@ -56,9 +56,9 @@ function MessageView({ m, insight, onEdit, onRegenerate, onSources, onTwin }: { 
   if (m.role === 'user') {
     return (
       <div id={`msg-${m.id}`} className="w-full">
-        <p className="w-full bg-[#2b2930] px-3 py-3 text-[15px] leading-6 text-white">{m.text}</p>
-        <button type="button" onClick={onEdit} className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline">
-          <Pencil size={12} aria-hidden /> Edit question
+        <p className="w-full rounded-ctl border border-line bg-quiet px-4 py-3 text-base">{m.text}</p>
+        <button type="button" onClick={onEdit} className="mt-1 inline-flex min-h-8 items-center gap-1 text-sm text-action hover:underline hover:underline-offset-[3px]">
+          <Pencil size={16} aria-hidden /> Edit question
         </button>
       </div>
     );
@@ -68,34 +68,34 @@ function MessageView({ m, insight, onEdit, onRegenerate, onSources, onTwin }: { 
   return (
     <div id={`msg-${m.id}`} className="grid gap-4 lg:grid-cols-[minmax(0,48rem)_minmax(0,12rem)]">
       <div>
-        <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink"><span className="grid size-4 place-items-center rounded-sm bg-ink/20 text-[10px]">A</span> Arqui</span>
+        <span className="t-eyebrow flex items-center gap-2"><Bot size={16} aria-hidden /> Arqui</span>
         <div className="mt-1">
           <RichText lines={m.lines ?? []} />
         </div>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {!org && (
-            <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={exportIt}>
-              <Share2 size={14} aria-hidden /> Export response
+            <button type="button" className="inline-flex min-h-8 items-center gap-1 text-action hover:underline hover:underline-offset-[3px]" onClick={exportIt}>
+              <Share2 size={16} aria-hidden /> Export response
             </button>
           )}
           {!org && (
-            <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onSources}>
-              <BadgeCheck size={14} aria-hidden /> Check sources
+            <button type="button" className="inline-flex min-h-8 items-center gap-1 text-action hover:underline hover:underline-offset-[3px]" onClick={onSources}>
+              <BadgeCheck size={16} aria-hidden /> Check sources
             </button>
           )}
-          <button type="button" className="inline-flex items-center gap-1 text-primary hover:underline" onClick={onRegenerate}>
-            <RefreshCw size={14} aria-hidden /> Regenerate
+          <button type="button" className="inline-flex min-h-8 items-center gap-1 text-action hover:underline hover:underline-offset-[3px]" onClick={onRegenerate}>
+            <RefreshCw size={16} aria-hidden /> Regenerate
           </button>
         </div>
         <span className="sr-only">{insight.title}</span>
       </div>
       {org && (
-        <aside aria-label="Sources" className="text-sm text-ink">
-          <h4 className="text-sm">Sources</h4>
-          <ul className="mt-1 list-disc pl-5 marker:text-primary">
-            <li><button type="button" onClick={onTwin} className="text-base text-primary hover:underline">Digital twin</button></li>
+        <aside aria-label="Sources" className="text-sm">
+          <h4 className="t-label">Sources</h4>
+          <ul className="mt-1 list-disc pl-5 marker:text-action">
+            <li><button type="button" onClick={onTwin} className="text-sm text-action hover:underline hover:underline-offset-[3px]">Digital twin</button></li>
           </ul>
-          <button type="button" onClick={exportIt} className="mt-3 inline-flex items-center gap-2 text-primary hover:underline">
+          <button type="button" onClick={exportIt} className="mt-3 inline-flex min-h-8 items-center gap-2 text-action hover:underline hover:underline-offset-[3px]">
             <Share2 size={16} aria-hidden /> Export
           </button>
         </aside>
@@ -133,10 +133,10 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
       <div className="flex flex-col gap-6 py-4" role="log" aria-live="polite" aria-label="Chat">
         {msgs.length === 0 && (
           <div className="space-y-3">
-            <p className="text-sm text-muted">Ask Arqui about this insight, or try one of these.</p>
+            <p className="text-base text-fg-2">Ask Arqui about this insight, or choose a question to start.</p>
             <div className="flex flex-wrap gap-2">
               {starters.map((s) => (
-                <Button key={s} variant="outlined" className="!h-auto !rounded-2xl !py-2 text-left" onClick={() => ask(insight.id, s)}>
+                <Button key={s} variant="secondary" className="!h-auto !py-2 text-left" onClick={() => ask(insight.id, s)}>
                   {s}
                 </Button>
               ))}
@@ -154,11 +154,11 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
             onTwin={() => setTwin(true)}
           />
         ))}
-        {isTyping && <p className="text-sm text-muted" role="status">Arqui is thinking...</p>}
+        {isTyping && <p className="t-small text-fg-2" role="status">Arqui is working on an answer.</p>}
         <div ref={endRef} />
       </div>
       <form
-        className="sticky bottom-0 z-10 flex shrink-0 items-end gap-2 border-t border-line bg-canvas pb-3 pt-3"
+        className="sticky bottom-0 z-10 flex shrink-0 items-end gap-2 border-t border-line bg-page py-3"
         onSubmit={(e) => { e.preventDefault(); send(); }}
       >
         <textarea
@@ -168,10 +168,10 @@ function ChatPanel({ insight, scrollTo }: { insight: Insight; scrollTo: string |
           rows={1}
           aria-label="Ask Arqui"
           placeholder="Ask Arqui"
-          className="max-h-32 min-h-12 flex-1 resize-none rounded-t bg-field px-4 py-3 text-base text-white outline-none border-b border-outline focus:border-primary"
+          className="max-h-32 min-h-11 flex-1 resize-none rounded-ctl border border-control bg-page px-3 py-2 text-base text-fg hover:border-fg-2 focus:border-action focus:shadow-[0_0_0_1px_var(--action)] focus:outline-none placeholder:text-fg-2"
         />
-        <IconButton label="Send" type="submit" disabled={!text.trim() || isTyping} className="text-primary disabled:opacity-40">
-          <Send size={22} />
+        <IconButton label="Send question" type="submit" disabled={!text.trim() || isTyping} className="bg-action text-on-action hover:!bg-action disabled:!bg-line">
+          <Send size={20} />
         </IconButton>
       </form>
       {sources && <SourcesModal insight={insight} onClose={() => setSources(false)} />}
@@ -187,14 +187,14 @@ function HistoryPanel({ insight, onOpen }: { insight: Insight; onOpen: (id: stri
   const qs = (state.chats[insight.id] ?? []).filter((m) => m.role === 'user');
   return (
     <div className="space-y-4 py-5">
-      <h3 className="text-lg font-medium text-white">Chat history ({qs.length} question{qs.length === 1 ? '' : 's'})</h3>
-      {qs.length === 0 && <p className="text-sm text-muted">No questions yet. Ask one in the Chat tab.</p>}
+      <h3 className="t-h3">Chat history ({qs.length} question{qs.length === 1 ? '' : 's'})</h3>
+      {qs.length === 0 && <p className="text-sm text-fg-2">No questions yet. Ask one in the Chat tab.</p>}
       <ol className="space-y-1">
         {qs.map((m, i) => (
           <li key={m.id}>
-            <button type="button" onClick={() => onOpen(m.id)} className="grid w-full grid-cols-[84px_1fr] gap-3 rounded-lg px-3 py-2 text-left hover:bg-white/5">
-              <span className="text-primary">Question {i + 1}</span>
-              <span className="text-ink">{m.text}</span>
+            <button type="button" onClick={() => onOpen(m.id)} className="grid w-full grid-cols-[96px_1fr] gap-3 rounded-ctl px-3 py-2 text-left hover:bg-quiet active:bg-action-soft">
+              <span className="t-label">Question {i + 1}</span>
+              <span>{m.text}</span>
             </button>
           </li>
         ))}
@@ -215,8 +215,8 @@ function SummaryPanel({ insight }: { insight: Insight }) {
     <div className="space-y-4 py-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-medium text-white">Chat summary</h3>
-          <p className="text-sm text-muted">Note: The chat summary is updated every time you ask a question.</p>
+          <h3 className="t-h3">Chat summary</h3>
+          <p className="t-small text-fg-2">Note: The chat summary is updated every time you ask a question.</p>
         </div>
         <Button onClick={exportText}><Download size={16} aria-hidden /> Export summary</Button>
       </div>
@@ -231,16 +231,16 @@ function ActionsPanel({ insight, onDeliverables }: { insight: Insight; onDeliver
   return (
     <div className="space-y-5 py-5">
       <div>
-        <h3 className="text-lg font-medium text-white">Suggested actions ({actions.length})</h3>
-        <p className="text-sm text-muted">Note: The list of suggested actions is updated every time you ask a question.</p>
+        <h3 className="t-h3">Suggested actions ({actions.length})</h3>
+        <p className="t-small text-fg-2">Note: The list of suggested actions is updated every time you ask a question.</p>
       </div>
       <ul className="space-y-6">
         {actions.map((a) => (
-          <li key={a.title} className="space-y-2 text-[15px] leading-6">
-            <h4 className="font-medium text-white">{a.title}</h4>
-            <p className="text-ink">{a.body}</p>
+          <li key={a.title} className="space-y-2 text-base">
+            <h4 className="font-semibold">{a.title}</h4>
+            <p>{a.body}</p>
             {a.lines && a.lines.length > 0 && <RichText lines={a.lines} />}
-            <button type="button" onClick={onDeliverables} className="text-primary underline-offset-2 hover:underline">
+            <button type="button" onClick={onDeliverables} className="text-sm text-action underline-offset-[3px] hover:underline">
               Arqui can help with {groups.find((g) => g.action.toLowerCase().includes(a.title.toLowerCase().slice(0, 12)))?.items.length ?? 2} deliverables
             </button>
           </li>
@@ -260,34 +260,34 @@ function DeliverableDetail({ insight, title, onClose }: { insight: Insight; titl
   const input = useRef<HTMLInputElement>(null);
   const asText = [title, report.date, '', report.intro, ...report.sections.flatMap((s) => ['', s.h, ...s.items.map((i) => `- ${i}`)]), '', report.disclaimer].join('\n');
   return (
-    <div className="space-y-4 py-5 text-[15px] leading-6 text-ink">
+    <div className="space-y-4 py-5 text-base">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-lg font-medium text-white">Detailed deliverable</h3>
+        <h3 className="t-h3">Detailed deliverable</h3>
         <div className="flex gap-2">
           <Button onClick={() => { download(`${title}.txt`, asText); toast('Deliverable downloaded'); }}><Download size={16} aria-hidden /> Export</Button>
           <Button onClick={() => { setMarked((b) => !b); toast(marked ? 'Bookmark removed' : 'Bookmarked'); }} aria-pressed={marked}><Bookmark size={16} aria-hidden fill={marked ? 'currentColor' : 'none'} /> Bookmark</Button>
           <Button onClick={onClose}>Close</Button>
         </div>
       </div>
-      <div className="rounded-xl bg-rail p-5">
-        <p className="text-xs uppercase tracking-wide text-muted">{report.date}</p>
-        <h4 className="mb-2 text-base font-medium text-primary">{title}</h4>
+      <div className="rounded-card border border-line bg-quiet p-6">
+        <p className="t-eyebrow">{report.date}</p>
+        <h4 className="t-h3 mb-2">{title}</h4>
         <p>{report.intro}</p>
         {report.sections.map((s) => (
           <div key={s.h} className="mt-4">
-            <h5 className="font-medium text-white">{s.h}</h5>
+            <h5 className="font-semibold">{s.h}</h5>
             <ul className="list-disc space-y-1 pl-6">{s.items.map((i) => <li key={i}>{i}</li>)}</ul>
           </div>
         ))}
-        <p className="mt-4 text-sm text-muted">{report.disclaimer}</p>
+        <p className="t-small mt-4 text-fg-2">{report.disclaimer}</p>
       </div>
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <h4 className="font-medium text-white">Uploaded documents</h4>
-          <Button variant="tonal" onClick={() => input.current?.click()}><Upload size={16} aria-hidden /> Upload documents</Button>
+          <h4 className="font-semibold">Uploaded documents</h4>
+          <Button variant="secondary" onClick={() => input.current?.click()}><Upload size={16} aria-hidden /> Upload documents</Button>
           <input ref={input} type="file" multiple hidden onChange={(e) => { const n = Array.from(e.target.files ?? []).map((f) => f.name); if (n.length) { setFiles((f) => [...f, ...n]); toast(`${n.length} document${n.length > 1 ? 's' : ''} added`); } }} />
         </div>
-        {files.length === 0 ? <p className="text-sm text-muted">No documents uploaded yet.</p> : <ul className="divide-y divide-line rounded-lg border border-line text-sm text-primary">{files.map((f, i) => <li key={`${f}${i}`} className="px-3 py-1.5">{f}</li>)}</ul>}
+        {files.length === 0 ? <p className="text-sm text-fg-2">No documents uploaded yet.</p> : <ul className="divide-y divide-line rounded-card border border-line text-sm text-action">{files.map((f, i) => <li key={`${f}${i}`} className="px-3 py-1.5">{f}</li>)}</ul>}
       </div>
     </div>
   );
@@ -307,17 +307,17 @@ function DeliverablesPanel({ insight }: { insight: Insight }) {
     return (
       <li className="grid gap-3 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-wide text-muted">Deliverable</p>
+          <p className="t-eyebrow">Deliverable</p>
           <p className="flex flex-wrap items-center gap-2">
-            <span className="text-primary">{title}</span>
-            {status !== 'AVAILABLE' && <Chip className="!h-6 !text-[11px] !text-ink">{status}</Chip>}
+            <span className="t-h3">{title}</span>
+            {status !== 'AVAILABLE' && <Chip>{status === 'COMPLETE' ? 'Complete' : 'In progress'}</Chip>}
           </p>
-          <p className="text-[15px] leading-6 text-ink">{text}</p>
+          <p className="text-base text-fg-3">{text}</p>
         </div>
         {status === 'AVAILABLE' ? (
-          <Button onClick={() => startDeliverable(insight.id, title)}>Create</Button>
+          <Button onClick={() => startDeliverable(insight.id, title)}>Create deliverable</Button>
         ) : (
-          <Button onClick={() => setOpen(title)} disabled={status === 'IN PROGRESS'}>{status === 'IN PROGRESS' ? 'Creating...' : 'Open'}</Button>
+          <Button onClick={() => setOpen(title)} disabled={status === 'IN PROGRESS'}>{status === 'IN PROGRESS' ? 'Creating' : 'Open deliverable'}</Button>
         )}
       </li>
     );
@@ -327,20 +327,20 @@ function DeliverablesPanel({ insight }: { insight: Insight }) {
     <div className="space-y-4 py-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-medium text-white">Deliverables</h3>
-          <p className="text-sm text-muted">Note: The list of suggested deliverables is updated every time you ask a question.</p>
+          <h3 className="t-h3">Deliverables</h3>
+          <p className="t-small text-fg-2">Note: The list of suggested deliverables is updated every time you ask a question.</p>
         </div>
         <Button onClick={() => setAdding(true)}>Add a custom deliverable</Button>
       </div>
       {groups.map((g) => (
         <section key={g.action} aria-label={g.action}>
-          <h4 className="font-medium text-white">Action: {g.action}</h4>
+          <h4 className="font-semibold">Action: {g.action}</h4>
           <ul className="divide-y divide-line">{g.items.map((i) => <Row key={i.title} title={i.title} text={i.text} />)}</ul>
         </section>
       ))}
       {custom.length > 0 && (
         <section aria-label="Custom deliverables">
-          <h4 className="font-medium text-white">Custom deliverables</h4>
+          <h4 className="font-semibold">Custom deliverables</h4>
           <ul className="divide-y divide-line">{custom.map((c) => <Row key={c.title} title={c.title} text={c.text} />)}</ul>
         </section>
       )}
@@ -350,8 +350,8 @@ function DeliverablesPanel({ insight }: { insight: Insight }) {
             <TextField label="Title" required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
             <TextArea label="What should it cover?" value={draft.text} onChange={(e) => setDraft({ ...draft, text: e.target.value })} />
             <div className="flex justify-end gap-2">
-              <Button variant="text" onClick={() => setAdding(false)}>Cancel</Button>
-              <Button variant="filled" type="submit">Create deliverable</Button>
+              <Button variant="tertiary" onClick={() => setAdding(false)}>Cancel</Button>
+              <Button variant="primary" type="submit">Create deliverable</Button>
             </div>
           </form>
         </Modal>
@@ -379,26 +379,26 @@ function CollaboratorsPanel({ insight }: { insight: Insight }) {
   return (
     <div className="space-y-5 py-5">
       <div>
-        <h3 className="text-lg font-medium text-white">Add collaborators</h3>
-        <p className="text-sm text-ink">Collaborators will be able to contribute to the chat, and access all the other tabs within this insight.</p>
+        <h3 className="t-h3">Add collaborators</h3>
+        <p className="text-base text-fg-3">Collaborators will be able to contribute to the chat, and access all the other tabs within this insight.</p>
       </div>
       {list.length > 0 && (
         <ul className="grid gap-4 xl:grid-cols-2">
           {list.map((c) => (
-            <li key={c.email} className="flex flex-col gap-2 rounded-xl bg-rail p-5">
-              <p className="break-all text-base text-white">{c.email}</p>
-              <p className="text-sm text-muted">{c.role}</p>
-              <p className="flex-1 text-sm leading-5 text-ink">{c.message}</p>
-              <div><Button onClick={() => { removeCollaborator(insight.id, c.email); toast(`${c.email} removed`); }}><Trash2 size={15} aria-hidden /> Remove</Button></div>
+            <li key={c.email} className="flex flex-col gap-2 rounded-card border border-line bg-card p-6">
+              <p className="t-h3 break-all">{c.email}</p>
+              <p className="t-small text-fg-2">{c.role}</p>
+              <p className="t-small flex-1 text-fg-3">{c.message}</p>
+              <div><Button onClick={() => { removeCollaborator(insight.id, c.email); toast(`${c.email} removed`); }}><Trash2 size={16} aria-hidden /> Remove</Button></div>
             </li>
           ))}
         </ul>
       )}
-      <form onSubmit={submit} noValidate className="grid max-w-2xl gap-3 rounded-xl bg-rail p-5">
+      <form onSubmit={submit} noValidate className="grid max-w-2xl gap-4 rounded-card border border-line bg-quiet p-6">
         <TextField label="Email" type="email" value={f.email} error={err} onChange={(e) => { setF({ ...f, email: e.target.value }); setErr(''); }} />
         <Select label="Invite as" options={['Collaborator', 'Viewer']} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} />
         <TextArea label="Message" value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} />
-        <div><Button variant="filled" type="submit">Send invite</Button></div>
+        <div><Button variant="primary" type="submit">Send invite</Button></div>
       </form>
     </div>
   );
@@ -408,24 +408,23 @@ function CollaboratorsPanel({ insight }: { insight: Insight }) {
 
 function Usefulness({ insight }: { insight: Insight }) {
   const { state, setUseful } = useApp();
-  const v = state.useful[insight.id] ?? 1;
+  const v = state.useful[insight.id] ?? null;
   const labels = ['No', 'Somewhat', 'Yes'];
   return (
-    <fieldset className="w-full min-w-[180px] max-w-[200px]">
-      <legend className="mb-2 text-xs text-white">Is this insight useful?</legend>
-      <div className="relative mx-2 h-6">
-        <div className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 rounded-full bg-panel-hi" />
-        {[0, 1, 2].map((i) => (
-          <label key={i} className="absolute top-0 flex h-6 w-6 -translate-x-1/2 cursor-pointer items-center justify-center" style={{ left: `${i * 50}%` }}>
-            <input type="radio" name={`useful-${insight.id}`} value={i} checked={v === i} onChange={() => setUseful(insight.id, i as 0 | 1 | 2)} className="peer sr-only" />
-            <span className="size-1 rounded-full bg-primary peer-checked:hidden" />
-            <span className="hidden h-6 w-1.5 rounded-sm bg-white peer-checked:block peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-primary" />
-            <span className="sr-only">{labels[i]}</span>
-          </label>
+    <fieldset className="min-w-[220px]">
+      <legend className="t-label mb-1">Is this insight useful?</legend>
+      <div className="flex overflow-hidden rounded-ctl border border-control" role="group">
+        {labels.map((l, i) => (
+          <button
+            key={l}
+            type="button"
+            aria-pressed={v === i}
+            onClick={() => setUseful(insight.id, i as 0 | 1 | 2)}
+            className={`min-h-11 flex-1 px-3 text-sm focus-visible:!outline-offset-[-3px] ${i > 0 ? 'border-s border-control' : ''} ${v === i ? 'bg-action font-semibold text-on-action' : 'bg-page text-fg hover:bg-quiet active:bg-action-soft'}`}
+          >
+            {l}
+          </button>
         ))}
-      </div>
-      <div className="mt-1 flex justify-between text-xs text-ink" aria-hidden>
-        {labels.map((l, i) => <span key={l} className={v === i ? 'text-white' : ''}>{l.toUpperCase()}</span>)}
       </div>
     </fieldset>
   );
@@ -456,8 +455,8 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
     <article aria-label={insight.title} className={`flex flex-col ${className}`}>
       <div className="grid shrink-0 grid-cols-[minmax(0,1fr)] gap-4 pb-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0 space-y-2">
-          <h2 className="text-lg leading-6 text-teal">{insight.title}</h2>
-          <p className="text-sm leading-5 text-ink">{insight.summary}</p>
+          <h2 className="t-h2">{insight.title}</h2>
+          <p className="text-base text-fg-3">{insight.summary}</p>
           <div className="flex flex-wrap gap-2 pt-1">
             {insight.pinned === 'landscape' ? <Chip origin="self">{originLabel.self}</Chip> : chipOrigin}
             {!insight.pinned || insight.pinned === 'landscape' ? <Chip>{insight.theme}</Chip> : null}
@@ -468,8 +467,8 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
         {(!insight.pinned || insight.pinned === 'landscape') && (
           <div className="flex flex-col gap-3 md:items-start md:pl-6">
             <Usefulness insight={insight} />
-            <button type="button" onClick={() => setSources(true)} className="inline-flex items-center gap-2 text-xs text-primary hover:underline">
-              <BadgeCheck size={18} aria-hidden /> Check sources
+            <button type="button" onClick={() => setSources(true)} className="inline-flex min-h-8 items-center gap-2 text-sm text-action hover:underline hover:underline-offset-[3px]">
+              <BadgeCheck size={20} aria-hidden /> Check sources
             </button>
           </div>
         )}
@@ -486,7 +485,7 @@ export function InsightDetail({ insight, className = '' }: { insight: Insight; c
             tabIndex={tab === t ? 0 : -1}
             onClick={() => { setTab(t); setScrollTo(null); }}
             onKeyDown={(e) => onKey(e, i)}
-            className={`shrink-0 border-b-[3px] px-3 py-3.5 text-sm font-medium tracking-[0.1px] ${tab === t ? 'border-primary text-white' : 'border-transparent text-primary hover:bg-white/5'}`}
+            className={`min-h-11 shrink-0 border-b-[3px] px-3 text-base transition-colors ${tab === t ? 'border-brand font-semibold text-fg' : 'border-transparent font-medium text-fg-2 hover:border-line-strong hover:text-fg'}`}
           >
             {t}
             {t === 'Collaborators' && collabCount > 0 ? ` (${collabCount})` : ''}

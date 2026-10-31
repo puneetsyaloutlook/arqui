@@ -1,0 +1,52 @@
+/* Design tokens from "Design system - default". Light is the default; dark follows the system or data-theme. */
+:root {
+  --neutral-900: #1a1a2e; --neutral-700: #3d3d50; --neutral-500: #8e8e9a; --neutral-300: #b8b8c2; --neutral-200: #d4d4da; --neutral-100: #ededf0;
+  --warm-900: #6b5b2e; --warm-700: #b8963e; --warm-500: #d4c48a; --warm-300: #e8ddb8; --warm-200: #f0e8d4; --warm-100: #f5f0e6;
+  --teal-900: #1d6068; --teal-700: #3a8a8f; --teal-500: #5cb8b8; --teal-300: #9ad4d4; --teal-200: #c4e8e8; --teal-100: #e4f4f4;
+  --blue-900: #376da4; --blue-700: #5a8dbe; --blue-500: #8db8e3; --blue-300: #bcd5f3; --blue-200: #d8e8f8; --blue-100: #ecf2fa;
+  --primary: #479fa4; --on-primary: #1a1a2e; --secondary: #c39a44; --error: #d64545;
+  --accent-yellow: #ffd770; --accent-green: #27ae60; --accent-green-light: #6fcf97; --accent-indigo: #96a7d7;
+
+  --surface-page: #ffffff; --surface-quiet: #f4f4f7; --surface-card: #ffffff; --surface-nav: var(--teal-900); --surface-overlay: #ffffff;
+  --border-default: #d4d4da; --border-strong: #b8b8c2; --border-control: #8e8e9a;
+  --scrim: rgba(26, 26, 46, 0.48); --selection: var(--teal-200); --rule: var(--teal-700);
+  --text-primary: #1a1a2e; --text-secondary: #55556a; --text-tertiary: #3d3d50; --text-disabled: var(--neutral-300); --text-inverse: #ffffff;
+  --action: #376da4; --on-action: #ffffff; --action-soft: #ecf2fa; --text-link: var(--action); --focus: var(--action);
+  --mark: var(--teal-900); --mark-soft: var(--teal-100);
+  --status-success: #219653; --status-warning: var(--warm-900); --status-error: var(--error); --status-info: #376da4;
+  --chart-1: #376da4; --chart-2: #479fa4; --chart-3: #c39a44; --chart-4: #27ae60; --chart-context: #8c8c9a; --chart-ink: var(--text-secondary); --chart-line: var(--border-default); --chart-wash: var(--surface-quiet);
+
+  --space-xs: 4px; --space-sm: 8px; --space-sm-md: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px; --space-3xl: 64px;
+  --radius-default: 6px; --radius-lg: 8px; --radius-pill: 9999px;
+  --shadow-subtle: 0 1px 2px rgba(16, 16, 32, 0.06), 0 1px 3px rgba(16, 16, 32, 0.08);
+  --shadow-elevated: 0 2px 4px rgba(16, 16, 32, 0.06), 0 8px 24px rgba(16, 16, 32, 0.12);
+  --shadow-modal: 0 4px 8px rgba(16, 16, 32, 0.08), 0 24px 48px rgba(16, 16, 32, 0.18);
+  --motion-fast: 100ms; --motion-base: 150ms; --motion-slow: 250ms; --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --layout-control: 44px; --layout-topbar: 64px; --layout-sidebar: 240px; --layout-sidebar-collapsed: 64px; --layout-content: 1180px; --layout-measure: 62ch;
+  --press-hover: rgba(0, 0, 0, 0.09); --press-active: rgba(0, 0, 0, 0.18);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --surface-page: #14141f; --surface-quiet: #1b1b2a; --surface-card: #1b1b2a; --surface-overlay: #232338;
+  --border-default: #34344a; --border-strong: #4c4c66; --border-control: #6e6e88;
+  --scrim: rgba(0, 0, 0, 0.64); --selection: #24505a; --rule: var(--teal-500);
+  --text-primary: #ededf0; --text-secondary: #a9a9b8; --text-tertiary: #c9c9d4; --text-disabled: #4c4c66;
+  --action: #8db8e3; --on-action: #14141f; --action-soft: #222e43;
+  --mark: var(--teal-500); --mark-soft: #1a3034;
+  --status-success: #6fcf97; --status-warning: #ffd770; --status-info: #8db8e3;
+  --chart-1: #5a8dbe; --chart-2: #9ad4d4; --chart-context: #7a7a92;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --surface-page: #14141f; --surface-quiet: #1b1b2a; --surface-card: #1b1b2a; --surface-overlay: #232338;
+    --border-default: #34344a; --border-strong: #4c4c66; --border-control: #6e6e88;
+    --scrim: rgba(0, 0, 0, 0.64); --selection: #24505a; --rule: var(--teal-500);
+    --text-primary: #ededf0; --text-secondary: #a9a9b8; --text-tertiary: #c9c9d4; --text-disabled: #4c4c66;
+    --action: #8db8e3; --on-action: #14141f; --action-soft: #222e43;
+    --mark: var(--teal-500); --mark-soft: #1a3034;
+    --status-success: #6fcf97; --status-warning: #ffd770; --status-info: #8db8e3;
+    --chart-1: #5a8dbe; --chart-2: #9ad4d4; --chart-context: #7a7a92;
+    color-scheme: dark;
+  }
+}

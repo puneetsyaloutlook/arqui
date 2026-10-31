@@ -1,53 +1,80 @@
 @import "tailwindcss";
-@import "@fontsource-variable/roboto";
-@import "@fontsource-variable/open-sans";
-@import "@fontsource/oswald/600.css";
+@import "@fontsource-variable/public-sans";
+@import "@fontsource-variable/lora";
+@import "./styles/tokens.css";
 
-@theme {
-  --font-sans: "Roboto Variable", Roboto, system-ui, sans-serif;
-  --font-body: "Open Sans Variable", "Open Sans", system-ui, sans-serif;
-  --font-logo: "Oswald", "Arial Narrow", sans-serif;
+/* Tailwind names for the design tokens. The values come from tokens.css, so both themes work. */
+@theme inline {
+  --font-sans: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
+  --font-serif: "Lora Variable", Lora, Georgia, serif;
 
-  --color-canvas: #202125;
-  --color-rail: #141218;
-  --color-panel: #1d1b20;
-  --color-panel-hi: #2b2930;
-  --color-field: #36343b;
-  --color-line: #36343b;
-  --color-chip: #4e4b53;
-  --color-primary: #d0bcff;
-  --color-on-primary: #381e72;
-  --color-pink: #ed00b8;
-  --color-teal: #00c2a7;
-  --color-orange: #ff693e;
-  --color-amber: #ffbb33;
-  --color-muted: #aeaeae;
-  --color-subtle: #7a7480;
-  --color-outline: #938f99;
-  --color-ink: #e6e0e9;
+  --color-page: var(--surface-page);
+  --color-quiet: var(--surface-quiet);
+  --color-card: var(--surface-card);
+  --color-nav: var(--surface-nav);
+  --color-overlay: var(--surface-overlay);
+  --color-line: var(--border-default);
+  --color-line-strong: var(--border-strong);
+  --color-control: var(--border-control);
+  --color-fg: var(--text-primary);
+  --color-fg-2: var(--text-secondary);
+  --color-fg-3: var(--text-tertiary);
+  --color-fg-off: var(--text-disabled);
+  --color-inverse: var(--text-inverse);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-action-soft: var(--action-soft);
+  --color-mark: var(--mark);
+  --color-mark-soft: var(--mark-soft);
+  --color-brand: var(--primary);
+  --color-on-brand: var(--on-primary);
+  --color-scrim: var(--scrim);
+  --color-danger: var(--status-error);
+  --color-neutral-100: var(--neutral-100);
+
+  --radius-ctl: var(--radius-default);
+  --radius-card: var(--radius-lg);
+  --shadow-subtle: var(--shadow-subtle);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-modal: var(--shadow-modal);
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-  background: #202125;
-  color: #e6e0e9;
-  font-family: var(--font-sans);
+@layer base {
+  html { background: var(--surface-page); }
+  body {
+    margin: 0; background: var(--surface-page); color: var(--text-primary);
+    font-family: var(--font-sans); font-size: 1rem; line-height: 1.6;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; overflow-wrap: break-word;
+  }
+  ::selection { background: var(--selection); color: var(--text-primary); }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  svg.lucide { stroke-width: 1.5; }
+  p { text-wrap: pretty; }
+  h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+  button { cursor: pointer; }
+  * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 }
 
-button {
-  font: inherit;
+/* The eight type sizes (12, 14, 16, 18, 24, 32, 40, 48) arranged as the styles in the design system. */
+@layer components {
+  .t-h1 { font-family: var(--font-serif); font-size: 2rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+  .t-h2 { font-family: var(--font-serif); font-size: 1.5rem; line-height: 1.3; font-weight: 600; letter-spacing: -0.005em; }
+  .t-h3 { font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
+  .t-deck { font-family: var(--font-serif); font-size: 1.125rem; line-height: 1.5; color: var(--text-tertiary); }
+  .t-body { font-size: 1rem; line-height: 1.6; }
+  .t-small { font-size: 0.875rem; line-height: 1.5; }
+  .t-label { font-size: 0.875rem; line-height: 1.4; font-weight: 600; color: var(--text-secondary); }
+  .t-caption { font-size: 0.75rem; line-height: 1.4; font-weight: 500; letter-spacing: 0.01em; color: var(--text-secondary); }
+  .t-eyebrow { font-size: 0.75rem; line-height: 1.4; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+  .t-numeral { font-size: 1.5rem; line-height: 1; font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+  .t-stat { font-family: var(--font-serif); font-size: 2.5rem; line-height: 1.1; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums lining-nums; }
+  .t-logo { font-family: var(--font-serif); font-size: 1.5rem; line-height: 1; font-weight: 600; letter-spacing: 0.02em; }
+  .tnum { font-variant-numeric: tabular-nums lining-nums; }
 }
 
-:focus-visible {
-  outline: 2px solid #d0bcff;
-  outline-offset: 2px;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
-
-/* Thin scrollbars that suit the dark theme. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #4e4b53 transparent;
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid Highlight; }
 }

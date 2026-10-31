@@ -15,12 +15,12 @@ const overlap = (a: string, b: string) => {
 
 const THEME_STEPS: Record<string, string[]> = {
   Cybersecurity: ['Review the controls that protect the systems and data named in this insight.', 'Run a short targeted exercise, such as a simulation or access review, to test the current position.', 'Agree owners and dates for the three highest-risk gaps.'],
-  'Resource Management': ['Check the data that feeds the process against a physical or system-of-record count.', 'Find the two or three steps where errors are introduced most often.', 'Set a measure that shows whether the fix is working within a month.'],
-  'Cost Optimisation': ['Break the spend down by team, service and commitment type.', 'Identify idle or duplicated items that can be retired without risk.', 'Set a monthly review so the savings are kept.'],
-  'Talent Management': ['Talk to a small group of people in the affected roles to test what the data suggests.', 'Look for progression and ownership gaps, not only pay.', 'Pilot one change in a single team before rolling it out.'],
-  'Strategic Alignment': ['Link this insight to a named strategic objective and its owner.', 'Compare current priorities with what the insight suggests.', 'Bring a short recommendation to the next leadership meeting.'],
-  'Innovation and Agility': ['Map where ideas stall between proposal and funding.', 'Define clear entry criteria and decision dates for each stage.', 'Track a small set of flow measures, such as time in stage.'],
-  'Vendor Management': ['List the vendors involved, their contract dates and current performance.', 'Agree one standard way to track performance and escalate issues.', 'Prepare for the next renewal with data rather than anecdotes.'],
+  'Resource management': ['Check the data that feeds the process against a physical or system-of-record count.', 'Find the two or three steps where errors are introduced most often.', 'Set a measure that shows whether the fix is working within a month.'],
+  'Cost optimisation': ['Break the spend down by team, service and commitment type.', 'Identify idle or duplicated items that can be retired without risk.', 'Set a monthly review so the savings are kept.'],
+  'Talent management': ['Talk to a small group of people in the affected roles to test what the data suggests.', 'Look for progression and ownership gaps, not only pay.', 'Pilot one change in a single team before rolling it out.'],
+  'Strategic alignment': ['Link this insight to a named strategic objective and its owner.', 'Compare current priorities with what the insight suggests.', 'Bring a short recommendation to the next leadership meeting.'],
+  'Innovation and agility': ['Map where ideas stall between proposal and funding.', 'Define clear entry criteria and decision dates for each stage.', 'Track a small set of flow measures, such as time in stage.'],
+  'Vendor management': ['List the vendors involved, their contract dates and current performance.', 'Agree one standard way to track performance and escalate issues.', 'Prepare for the next renewal with data rather than anecdotes.'],
   Adoption: ['Identify which teams already use the shared tools well and why.', 'Remove one barrier for the teams that do not.', 'Share a short success story from an early adopter.'],
 };
 
@@ -46,7 +46,7 @@ export function answerFor(insight: Insight, question: string): Lines {
     }
     if (best && best.score >= 2) return best.a;
   }
-  const steps = THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic Alignment'];
+  const steps = THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic alignment'];
   const facts = sentences(insight.summary).slice(0, 3);
   const q = question.trim().replace(/\?+$/, '');
   return [
@@ -84,7 +84,7 @@ export interface DeliverableGroup {
 export function actionsFor(insight: Insight): ActionItem[] {
   if (insight.id === CYBER_ID) return CYBER.actions.map((a) => ({ title: a.title, body: a.body }));
   if (insight.id === 'quantum') return QUANTUM.actions.map((a) => ({ title: a.title, body: a.lines[0], lines: a.lines.slice(1).map((l) => (/^[^:]{3,60}:\s/.test(l) ? `• ${l}` : l)) }));
-  const steps = THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic Alignment'];
+  const steps = THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic alignment'];
   const titles = ['Validate the evidence', 'Prioritise the biggest gaps', 'Track progress with a simple measure'];
   return titles.map((t, i) => ({ title: `${t} for "${insight.title}"`, body: steps[i] }));
 }
@@ -119,7 +119,7 @@ export function reportFor(insight: Insight, title: string): Report {
     intro: `This document supports the insight "${insight.title}". It was generated from the information in your digital twin and should be reviewed before it is shared.`,
     sections: [
       { h: 'What the data shows', items: facts },
-      { h: 'Suggested areas for improvement', items: (THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic Alignment']).slice(0, 3) },
+      { h: 'Suggested areas for improvement', items: (THEME_STEPS[insight.theme] ?? THEME_STEPS['Strategic alignment']).slice(0, 3) },
     ],
     disclaimer: 'Disclaimer: This document is based on the data currently available and may not represent the full picture.',
     files: [],

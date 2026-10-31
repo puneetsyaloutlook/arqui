@@ -11,6 +11,10 @@ ARQUI (ARchitecture QUery and Insight) is a front-end prototype of an organisati
 - Scenario landscape bubble chart (horizon, impact, likelihood)
 - Responsive layout, desktop first, with a drawer menu on small screens
 
+## Design
+
+The interface uses the personal design system "Design system - default": Public Sans and Lora, light and dark themes (follows the system setting, with a toggle in the top bar), the colour, spacing, radius and shadow tokens in `src/styles/tokens.css`, and the type styles `t-h1` to `t-caption` in `src/index.css`. The sidebar icons and sign-in illustration are the originals, recoloured to the palette.
+
 ## Limits
 
 - There is no server. Data is sample data stored in the browser (`localStorage`, key `arqui-state-v2`). Clearing site data resets the app.

@@ -30,33 +30,32 @@ export default function SignIn() {
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Enter a valid email address.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('The email address is not valid. Enter it as name@example.com.');
     finish(email);
   };
 
   return (
-    <AuthLayout title="Sign in" translucent>
-      <div className="mt-8 grid gap-10 lg:mt-12 lg:grid-cols-[minmax(0,330px)_minmax(0,1fr)] lg:gap-16 lg:px-6">
+    <AuthLayout title="Sign in">
+      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:gap-16">
         <div>
           <form onSubmit={submit} noValidate className="space-y-4">
             <TextField label="Email" type="email" autoComplete="username" autoFocus value={email} error={error} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
-            <Checkbox label="Remember on this device" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="!text-primary" />
-            <Button variant="filled" type="submit">Continue</Button>
+            <Checkbox label="Remember on this device" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+            <Button variant="primary" type="submit">Continue</Button>
           </form>
           <hr className="my-6 border-line" />
-          <p className="mb-4 text-base text-white">Or sign in with</p>
-          <ul className="flex gap-6">
+          <h2 className="t-h3 mb-3">Or sign in with</h2>
+          <ul className="grid grid-cols-2 gap-2">
             {PROVIDERS.map((p) => (
               <li key={p.name}>
-                <button type="button" onClick={() => finish(`${p.name.toLowerCase()}.user@acme.com`)} className="flex w-16 flex-col items-center gap-1 rounded-lg py-1 text-xs text-white hover:bg-white/10">
-                  <img src={p.img} alt="" className="size-8 object-contain" />
-                  {p.name}
-                </button>
+                <Button className="w-full" onClick={() => finish(`${p.name.toLowerCase()}.user@acme.com`)}>
+                  <img src={p.img} alt="" className="size-5 object-contain" /> {p.name}
+                </Button>
               </li>
             ))}
           </ul>
         </div>
-        <div className="space-y-6 font-body text-base leading-8 text-white">
+        <div className="max-w-[62ch] space-y-4 text-base text-fg-3">
           <p>
             While Arqui is a powerful tool for analysing your organisation, it's crucial to remember its limitations. Just like any AI, we learn and grow based on the information you provide. This means that the quality and completeness of your data directly impact the reliability of our insights. Think of it as garbage in, garbage out. Additionally, our AI models, like all models, have inherent biases and limitations. This can lead to unexpected or skewed results, highlighting the importance of critically challenging our output and exploring alternative interpretations.
           </p>
