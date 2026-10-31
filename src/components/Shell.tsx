@@ -29,7 +29,7 @@ export function Logo({ className = '' }: { className?: string }) {
 }
 
 /** A spot icon drawn in the colour of the text beside it. */
-function SpotIcon({ src, className = '' }: { src: string; className?: string }) {
+export function SpotIcon({ src, className = '' }: { src: string; className?: string }) {
   return <span aria-hidden className={`inline-block shrink-0 bg-current ${className}`} style={{ WebkitMaskImage: `url(${src})`, maskImage: `url(${src})`, WebkitMaskSize: 'contain', maskSize: 'contain', WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat', WebkitMaskPosition: 'left center', maskPosition: 'left center' }} />;
 }
 

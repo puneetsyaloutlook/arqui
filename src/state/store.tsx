@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { answerFor, deliverablesFor, type Lines } from '../data/chat';
 import { CYBER } from '../data/content';
+import { AGENTS, DOCUMENTS, VERSIONS } from '../data/admin';
 import { INNOVATION_QA, QUANTUM, REGULATION_QA } from '../data/content2';
 import { CYBER_ID, SEED_INSIGHTS, type Area, type Insight } from '../data/seed';
 
@@ -25,8 +26,25 @@ export interface Profile {
 }
 export type DeliverableStatus = 'COMPLETE' | 'IN PROGRESS' | 'AVAILABLE';
 
+export interface AdminState {
+  org: { name: string; type: string; reach: string; size: string; scope: string; reviewers: string[] };
+  documents: string[];
+  model: { category: string; model: string };
+  agents: string[];
+  customAgents: { id: string; name: string; text: string }[];
+  reviewed: string[]; // perspective items
+  custom: { perspective: string; name: string; text: string }[];
+  ratings: Record<string, number>; // test insights
+  users: string[];
+  invites: string[];
+  versionNow: Record<string, number>;
+  publishedAt: string | null;
+}
+
 interface State {
   email: string | null;
+  role: 'user' | 'admin' | null;
+  admin: AdminState;
   onboarded: boolean;
   profile: Profile;
   insights: Insight[];
@@ -61,9 +79,26 @@ function seedChats(): Record<string, Message[]> {
   };
 }
 
+const initialAdmin = (): AdminState => ({
+  org: { name: 'Acme Corporation', type: '', reach: '', size: '', scope: 'organisation', reviewers: ['', '', '', ''] },
+  documents: [...DOCUMENTS],
+  model: { category: 'tech', model: 'bizbok' },
+  agents: AGENTS.slice(0, 5).map((a) => a.id),
+  customAgents: [],
+  reviewed: ['Innovation management'],
+  custom: [],
+  ratings: { c1: 4 },
+  users: ['sam.forcast@acme.arqui.com.au', 'jamie.blueprint@acme.arqui.com.au'],
+  invites: ['', '', '', '', '', '', '', '', '', '', ''],
+  versionNow: { about: VERSIONS.about.rows[0].v, documents: VERSIONS.documents.rows[0].v, model: VERSIONS.model.rows[0].v, agents: VERSIONS.agents.rows[0].v },
+  publishedAt: null,
+});
+
 function initial(): State {
   return {
     email: null,
+    role: null,
+    admin: initialAdmin(),
     onboarded: false,
     profile: { name: '', department: '', jobTitle: '', interests: [], roleNotes: '' },
     insights: SEED_INSIGHTS,
@@ -96,7 +131,8 @@ function load(): State {
 interface Api {
   state: State;
   typing: Record<string, boolean>;
-  signIn: (email: string) => void;
+  signIn: (email: string, role?: 'user' | 'admin') => void;
+  setAdmin: (patch: Partial<AdminState> | ((a: AdminState) => Partial<AdminState>)) => void;
   signOut: () => void;
   saveProfile: (p: Partial<Profile>, onboarded?: boolean) => void;
   ask: (insightId: string, question: string) => void;
@@ -170,8 +206,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       typing,
       toastMsg,
       toast,
-      signIn: (email) => setState((s) => ({ ...s, email })),
-      signOut: () => setState((s) => ({ ...s, email: null })),
+      signIn: (email, role = 'user') => setState((s) => ({ ...s, email, role })),
+      setAdmin: (patch) => setState((s) => ({ ...s, admin: { ...s.admin, ...(typeof patch === 'function' ? patch(s.admin) : patch) } })),
+      signOut: () => setState((s) => ({ ...s, email: null, role: null })),
       saveProfile: (p, onboarded) => setState((s) => ({ ...s, profile: { ...s.profile, ...p }, onboarded: onboarded ?? s.onboarded })),
       ask: (insightId, question) => {
         const q = question.trim();

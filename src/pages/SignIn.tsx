@@ -20,17 +20,20 @@ export default function SignIn() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [remember, setRemember] = useState(false);
+  const [role, setRole] = useState<'user' | 'admin'>('user');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  if (state.email) return <Navigate to={state.onboarded ? '/dashboard' : '/onboarding'} replace />;
+  if (state.email) return <Navigate to={state.role === 'admin' ? '/admin' : state.onboarded ? '/dashboard' : '/onboarding'} replace />;
 
   const finish = (who: string) => {
-    signIn(who);
-    navigate(state.onboarded ? '/dashboard' : '/onboarding', { replace: true });
+    signIn(who, role);
+    navigate(role === 'admin' ? '/admin' : state.onboarded ? '/dashboard' : '/onboarding', { replace: true });
   };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError('The email address is not valid. Enter it as name@example.com.');
+    if (role === 'admin' && password.length < 4) return setError('The password is missing. Enter at least 4 characters in this demo.');
     finish(email);
   };
 
@@ -38,8 +41,18 @@ export default function SignIn() {
     <AuthLayout title="Sign in">
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:gap-16">
         <div>
+          <fieldset className="mb-6">
+            <legend className="t-label mb-1">Sign in as</legend>
+            <div className="flex overflow-hidden rounded-ctl border border-control" role="group">
+              {(['user', 'admin'] as const).map((r, i) => (
+                <button key={r} type="button" aria-pressed={role === r} onClick={() => { setRole(r); setError(''); }} className={`min-h-11 flex-1 px-3 text-base focus-visible:!outline-offset-[-3px] ${i > 0 ? 'border-s border-control' : ''} ${role === r ? 'bg-action font-semibold text-on-action' : 'bg-page hover:bg-quiet active:bg-action-soft'}`}>{r === 'user' ? 'User' : 'Admin'}</button>
+              ))}
+            </div>
+            <p className="t-small mt-2 text-fg-2">{role === 'user' ? 'See insights and chat with Arqui.' : 'Set up and publish the digital twin.'}</p>
+          </fieldset>
           <form onSubmit={submit} noValidate className="space-y-4">
-            <TextField label="Email" type="email" autoComplete="username" autoFocus value={email} error={error} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
+            <TextField label="Email" type="email" autoComplete="username" autoFocus value={email} error={role === 'user' || password.length >= 4 || !error.includes('password') ? error : ''} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
+            {role === 'admin' && <TextField label="Password" type="password" autoComplete="current-password" value={password} error={error.includes('password') ? error : ''} onChange={(e) => { setPassword(e.target.value); setError(''); }} />}
             <Checkbox label="Remember on this device" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
             <Button variant="primary" type="submit">Continue</Button>
           </form>
