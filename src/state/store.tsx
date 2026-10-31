@@ -38,7 +38,7 @@ interface State {
   customThemes: string[];
 }
 
-const KEY = 'arqui-state-v2';
+const KEY = 'arqui-state-v3';
 let uid = 0;
 const newId = () => `${Date.now().toString(36)}-${(uid++).toString(36)}`;
 

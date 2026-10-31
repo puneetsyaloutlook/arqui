@@ -23,7 +23,7 @@ export default function Dashboard() {
   const allThemes = [...THEMES, ...state.customThemes];
   const activeThemes = themes ?? allThemes;
   const todays = useMemo(() => DASHBOARD_IDS.map((id) => state.insights.find((i) => i.id === id)).filter((i) => !!i), [state.insights]);
-  const shown = todays.filter((i) => areas.includes(i.area) && activeThemes.includes(i.theme) && (types.includes(i.origin) || (!!i.collaborators && types.includes('collab'))));
+  const shown = todays.filter((i) => areas.includes(i.area) && (themes === null || themes.includes(i.theme)) && (types.includes(i.origin) || (!!i.collaborators && types.includes('collab'))));
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   return (
