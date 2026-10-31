@@ -95,7 +95,7 @@ export function InsightList({
         )}
       </div>
       {extraTop}
-      <ul className="space-y-2.5 pb-4">
+      <ul className="space-y-2.5 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
         {insights.filter((i) => i.pinned).map((i) => (
           <InsightCard key={i.id} insight={i} selected={i.id === selectedId} onSelect={() => onSelect(i.id)} />
         ))}

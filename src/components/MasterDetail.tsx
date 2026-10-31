@@ -33,8 +33,8 @@ export function MasterDetail({ area, extraTop, empty }: { area: Area; extraTop?:
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-4 lg:grid-cols-[minmax(320px,427px)_minmax(0,1fr)] lg:px-6">
-      <div className={`${selected && !desktop ? 'hidden' : 'flex'} flex-col`}>
-        <InsightList area={area} insights={insights} selectedId={selected?.id ?? null} onSelect={select} extraTop={extraTop} />
+      <div className={`${selected && !desktop ? 'hidden' : 'flex'} flex-col lg:sticky lg:top-20 lg:h-[calc(100dvh-5rem)] lg:self-start`}>
+        <InsightList area={area} insights={insights} selectedId={selected?.id ?? null} onSelect={select} extraTop={extraTop} className="lg:h-full" />
       </div>
       <div className={`${selected ? 'flex' : 'hidden lg:flex'} min-w-0 flex-col`}>
         {selected ? (
